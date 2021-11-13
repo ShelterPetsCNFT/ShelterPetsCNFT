@@ -10,7 +10,7 @@ Check out or "whitepaper" here!  <br />
  <br />
 Other files include:  <br />
  <br />
-NumericItemCount.CSV - Contains the number of each items accurse in all of the ShelterPets  <br />
+NumericItemCount.CSV - Contains the number of each items occurs in all of the ShelterPets  <br />
 ShelterPetsItemList.CSV - Contains the complete item list for all ShelterPets  <br />
 ShelterPetsItemRarityList.CSV - Contains the complete rarity list for all ShelterPets   <br />
 ShelterPetsRarityRank.CSV - Rarity ranking (based on the sum of the inverses of each trait, see whitepaper*) <br />
