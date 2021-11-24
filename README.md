@@ -13,7 +13,7 @@ Check out or "whitepaper" here!  <br />
  
  Public address is: addr1q9w6m8067cmr29kmfjzqxw7mar483jzs5tqcgzpzg3zr7kdwptl4zp47af49xa2uugmuc59unw5l09zncd3770kydq0qys3r9w   <br />
   <br />
- This currenlty hold 2 ShelterPets for a giveaway, and will be where the charity funds will be distributed too. 
+
   <br />
   <br />
   Other files include:  <br />
