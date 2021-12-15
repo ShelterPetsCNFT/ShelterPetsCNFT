@@ -2,7 +2,7 @@
 
 Welcome to ShelterPets: <br />
 10,000 Hand drawn Dog and Cat #CNFTs launching on Cardano  <br />
-50% of all revenue to charity! goal of 250,000 ₳ for community chosen donations!  <br />
+50% of all revenue to charity! goal of ₳ 250,000 for community chosen donations!  <br />
 
 Check out or "whitepaper" here!  <br />
  <br />
