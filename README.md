@@ -12,6 +12,8 @@ Check out or "whitepaper" here!  <br />
  <br />
  
  Public address is: addr1q9w6m8067cmr29kmfjzqxw7mar483jzs5tqcgzpzg3zr7kdwptl4zp47af49xa2uugmuc59unw5l09zncd3770kydq0qys3r9w   <br />
+ 
+ or find us at our ADAHANDLE $shelterpets!!  <br />
   <br />
 
   <br />
