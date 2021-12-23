@@ -10,7 +10,7 @@ import datetime
 
 #########GLOBAL VARIABLES##############
 #If test = 1, test mint
-#if test='live', airdrop will be live (be careful as this can mint using nftmakerwallet). 
+#if test='live', airdrop will be live (be careful as this can mint using nftmakerwallet). backup varible must be changed in airdropapicall function
 test=1
 
 
