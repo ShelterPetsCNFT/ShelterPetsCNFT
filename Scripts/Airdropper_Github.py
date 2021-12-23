@@ -47,8 +47,8 @@ def makeapi(blockfrostprojid):
 
 def airdropapicall(receiveraddress):
 #api call to nftmaker to mint nft BE CAREFUL WITH THIS
-#backup here just to be safer.     
-    
+#backup here just to be safer. change to live to mint.     
+#Can be replaced with other minitng methods  
     backup=1
     if test ==1:
        
