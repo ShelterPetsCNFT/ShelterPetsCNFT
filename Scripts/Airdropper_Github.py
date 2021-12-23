@@ -45,7 +45,7 @@ def makeapi(blockfrostprojid):
     return api
 
 
-def airdropapicall():
+def airdropapicall(receiveraddress):
 #api call to nftmaker to mint nft BE CAREFUL WITH THIS
 #backup here just to be safer.     
     
@@ -103,51 +103,7 @@ def airdroprandom(policy_id,randomwinnercount=None,ShowMetaData=None ):
         
             print('NFT-MAKER API Call to MintAndSendRandom...')
             print('Printing API Call Response...')
-            temp=airdropapicall()
-
-        else:
-        
-            print('No Mint')
-
-    return
-
-
-def airdroprandom(policy_id,randomwinnercount=None,ShowMetaData=None ):
-    
-
-#policy_id: policy id of project to airdrop to
-#randomwinnercount: number of random winners
-#ShowMetaData: show metadata during airdrop if 1
-
-    assets = api.assets_policy(policy_id=policy_id) 
-    addressesrando=[]
-   
-    for asset in assets[1:]:
-
-        addressesrando.append(api.asset_addresses(asset=asset.asset)[0].address)      
-              
-    shufflingdeck = random.sample(addressesrando, len(addressesrando))
-    print("Airdrops winners: ")
-    
-
-    if ShowMetaData=='y' or ShowMetaData=='yes' or ShowMetaData=='Yes' or ShowMetaData=='Y':
-        meta=api.asset(asset.asset)
-        args = vars(meta.onchain_metadata)
-        print('Metadata of Asset: ')   
-        print(args)
-           
-   
-    for q in range(0,int(randomwinnercount)):
-        
-        receiveraddress=str(shufflingdeck[q])
-        print(shufflingdeck[q])
-        val = input("Execute API Call for Airdrop? ")
-
-        if val=='y' or val=='yes' or val=='Yes' or val=='Y':
-        
-            print('NFT-MAKER API Call to MintAndSendRandom...')
-            print('Printing API Call Response...')
-            temp=airdropapicall()
+            temp=airdropapicall(receiveraddress)
 
         else:
         
@@ -204,7 +160,7 @@ def airdropmeta(fulladd, policy_id, whatmeta2=None,whatmeta3=None,ShowMetaData=N
                 
                 print('NFT-MAKER API Call to MintAndSendRandom...')
                 print('Printing API Call Response...')
-                temp=airdropapicall()
+                temp=airdropapicall(receiveraddress)
             
     
         
@@ -272,7 +228,7 @@ def airdropminttime(timestart, timeend, policy_id,  ShowMetaData=None):
                    
                     print('NFT-MAKER API Call to MintAndSendRandom...')
                     print('Printing API Call Response...')
-                    temp=airdropapicall() 
+                    temp=airdropapicall(receiveraddress) 
             
             else:
                
