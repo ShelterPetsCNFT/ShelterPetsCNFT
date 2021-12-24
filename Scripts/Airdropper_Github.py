@@ -68,12 +68,12 @@ def airdropapicall(receiveraddress):
 
 
 
-def airdroprandom(policy_id,randomwinnercount=None,ShowMetaData=None ):
+def airdroprandom(policy_id,randomwinnercount=None):
     
 
 #policy_id: policy id of project to airdrop to
 #randomwinnercount: number of random winners
-#ShowMetaData: show metadata during airdrop if 1
+
 
     assets = api.assets_policy(policy_id=policy_id) 
     addressesrando=[]
@@ -86,14 +86,11 @@ def airdroprandom(policy_id,randomwinnercount=None,ShowMetaData=None ):
     print("Airdrops winners: ")
     
 
-    if ShowMetaData=='y' or ShowMetaData=='yes' or ShowMetaData=='Yes' or ShowMetaData=='Y':
-        meta=api.asset(asset.asset)
-        args = vars(meta.onchain_metadata)
-        print('Metadata of Asset: ')   
-        print(args)
+
            
    
     for q in range(0,int(randomwinnercount)):
+        
         
         receiveraddress=str(shufflingdeck[q])
         print(shufflingdeck[q])
@@ -278,7 +275,6 @@ if __name__ == "__main__":
             
                 policy_id= input("Policy ID of project to airdrop to?    ")
                 randomwinnercount=input("Enter number of winners:   ")
-                ShowMetaData=input("Show Meta Data? Y/N:  ")
                 print('Random send started...')
                 airdroprandom(str(policy_id),randomwinnercount,ShowMetaData)
                 exit()
