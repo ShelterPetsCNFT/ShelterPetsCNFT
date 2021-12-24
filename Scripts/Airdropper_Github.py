@@ -105,7 +105,9 @@ def airdroprandom(policy_id,randomwinnercount=None):
         else:
         
             print('No Mint')
-
+        print("\n")
+        print("\n")    
+        print("\n")
     return
 
 
