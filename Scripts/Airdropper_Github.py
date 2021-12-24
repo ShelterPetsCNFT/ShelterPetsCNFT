@@ -276,7 +276,7 @@ if __name__ == "__main__":
                 policy_id= input("Policy ID of project to airdrop to?    ")
                 randomwinnercount=input("Enter number of winners:   ")
                 print('Random send started...')
-                airdroprandom(str(policy_id),randomwinnercount,ShowMetaData)
+                airdroprandom(str(policy_id),randomwinnercount)
                 exit()
 
             elif what =='minttime':
