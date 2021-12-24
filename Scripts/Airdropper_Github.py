@@ -174,7 +174,7 @@ def airdropmeta(fulladd, policy_id, whatmeta2=None,whatmeta3=None,ShowMetaData=N
                
                 print('NFT-MAKER API Call to MintAndSendRandom...')
                 print('Printing API Call Response...')
-                temp=airdropapicall() 
+                temp=airdropapicall(receiveraddress) 
         
         else:
            
