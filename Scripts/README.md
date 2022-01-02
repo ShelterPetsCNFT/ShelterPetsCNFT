@@ -1,3 +1,7 @@
+USE SCRIPT AT OWN RISK, NO OBLIGATION TO PROVIDE SUPPORT
+
+
+
 
 AIRDROP
 Make sure to pip install blockfrost-python before running.
