@@ -32,7 +32,7 @@ imageloc=''
 #folder where layers are
 # folder names should be metadata headers
 #file names should be metadta values
-folder = '/home/infrasound/Desktop/NewFolder/GenericPythontry/trait-layers/'
+folder = ''
 
 
 
