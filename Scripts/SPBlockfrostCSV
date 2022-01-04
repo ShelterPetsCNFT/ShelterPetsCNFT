@@ -11,7 +11,7 @@ from collections import Counter
 
 os.system('cls||clear')
 #blockfrost project id
-blockfrostprojid='mainnet8FG7PbLJH4ttkEMBEEziqOIIFHhtu7j6'    
+blockfrostprojid=''    
 
 
 def progressBar(current, total, barLength = 20):
