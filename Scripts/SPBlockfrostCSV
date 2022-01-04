@@ -1,0 +1,85 @@
+import sys 
+import time
+from blockfrost import BlockFrostApi, ApiError, ApiUrls
+import requests
+import pandas as pd
+import argparse
+import random
+import os
+import datetime
+
+
+os.system('cls||clear')
+#blockfrost project id
+blockfrostprojid=''    
+
+
+def progressBar(current, total, barLength = 20):
+    percent = float(current) * 100 / total
+    arrow   = '*' * int(percent/100 * barLength - 1) 
+    spaces  = ' ' * (barLength - len(arrow))
+
+    print('Progress: [%s%s] %d %%' % (arrow, spaces, percent), end='\r')
+
+def makeapi(blockfrostprojid):
+
+    api = BlockFrostApi(
+            project_id=blockfrostprojid,
+
+            base_url=ApiUrls.mainnet.value,
+    )
+    
+    return api
+def addrmetacsv():    
+    dict={}
+    for i in range(1,len(assets)):
+        progressBar(i, len(assets)-1, barLength = 20)
+        address=str(api.asset_addresses(asset=assets[i].asset)[0].address)
+        
+        meta=api.asset(assets[i].asset)
+        args = vars(meta.onchain_metadata) 
+        headers=args.keys()
+        metavalues=[]
+        for name in headers:
+            if name!= 'files':
+                metavalues.append(args[name])
+            
+        
+        dict[address]=args
+    print('\n')
+    df = pd.DataFrame(dict) 
+    df.to_csv (r'addrmetascv.csv')
+    
+    
+def addrcsv():    
+    dict=[]
+    for i in range(1,len(assets)):
+        progressBar(i, len(assets)-1, barLength = 20)
+        address=str(api.asset_addresses(asset=assets[i].asset)[0].address)
+        
+
+        dict.append(address)
+    print('\n')
+    df = pd.DataFrame(dict)
+   
+    df.to_csv (r'addrcsv.csv')
+if __name__ == "__main__":    
+    
+    
+    api = makeapi(blockfrostprojid)
+    print('Welcome to the ShelterPets BF API tools')
+    policy_id=input('Enter Policy ID of project:  ')
+    
+    assets = api.assets_policy(policy_id=policy_id)
+    
+    includemeta=input('Include metadata in CSV file? Y/N? ')
+    if includemeta=='y' or includemeta=='Y':
+        addrmetacsv()
+        print('file saved in current directory')
+        exit()
+    else:
+        addrcsv()
+        print('file saved in current directory')
+        exit()
+ 
+            
