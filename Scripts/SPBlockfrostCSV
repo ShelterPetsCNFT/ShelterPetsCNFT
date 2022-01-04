@@ -60,6 +60,7 @@ def addrcsv():
 
         dict.append(address)
     print('\n')
+    dict=list(set(dict))
     df = pd.DataFrame(dict)
    
     df.to_csv (r'addrcsv.csv')
