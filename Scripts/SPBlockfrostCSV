@@ -7,11 +7,11 @@ import argparse
 import random
 import os
 import datetime
-
+from collections import Counter
 
 os.system('cls||clear')
 #blockfrost project id
-blockfrostprojid=''    
+blockfrostprojid='mainnet8FG7PbLJH4ttkEMBEEziqOIIFHhtu7j6'    
 
 
 def progressBar(current, total, barLength = 20):
@@ -53,16 +53,26 @@ def addrmetacsv():
     
 def addrcsv():    
     dict=[]
+    dict1=[]
     for i in range(1,len(assets)):
         progressBar(i, len(assets)-1, barLength = 20)
         address=str(api.asset_addresses(asset=assets[i].asset)[0].address)
         
 
         dict.append(address)
+        temp=api.address(address, return_type='json')
+        dict1.append(temp['stake_address'])
     print('\n')
+    
     dict=list(set(dict))
-    df = pd.DataFrame(dict)
-   
+    countdict=Counter(dict1)
+    finaldict={}
+    for k,v in countdict.items():
+        newk=api.account_addresses(k,return_type='json')
+        newk=newk[0]['address']
+        finaldict[str(newk)]=v
+    df = pd.DataFrame.from_dict(finaldict, orient='index').reset_index()
+    
     df.to_csv (r'addrcsv.csv')
 if __name__ == "__main__":    
     
