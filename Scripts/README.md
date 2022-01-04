@@ -22,3 +22,11 @@ This script will generate an nft set based on layers and weight of layers. it wi
 make sure to arranage folders/pictures correctly
 
 be careful, script may not work in all cases, only use if you fully understand it. 
+
+
+ <br />
+  <br />
+  
+  BLOCKFROST HOLDER CSV
+  
+  just input your own blockfrost api id in the code and run
