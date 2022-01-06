@@ -161,7 +161,7 @@ if __name__ == "__main__":
         
         
         
-        projectname=input('Project Name: ')
+        projectname=input('Base name for NFT (ShelterPets for example): ')
         newproj=input('New project: Y/N?  ')
         if newproj != 'y' and newproj !='Y':
            nftprojectid=input('Input NFT-MAKER Project ID:  ')
