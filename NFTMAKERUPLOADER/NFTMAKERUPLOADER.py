@@ -51,9 +51,9 @@ def create_project(namelistr):
     for namer in namelistr:
         metadatastring['721']['<policy_id>']['<asset_name>'][namer]=f'<{namer}>'
     
-    admeta=input('additional constant metadata values (not based on layers)? Y/N')
+    admeta=input('additional constant metadata values (not based on layers)? Y/N  ')
     if admeta=='y' or admeta == 'Y':
-        howmany=input('How many more?')
+        howmany=input('How many more?  ')
         metvalue=[]
         for tt in range(0,int(howmany)):
             headername=input('Header name:  ')
@@ -64,7 +64,7 @@ def create_project(namelistr):
     namer=input('NFTMAKER Project Name:  ')
     project={
           "projectname": str(namer),
-          "description": "Rich, Broke, Old, Young, Ugly, Pretty, There are all kinds of AdaBlox!",
+          "description": "",
           "projecturl": "",
           "tokennamePrefix": "",
           "policyExpires": True,
@@ -199,8 +199,7 @@ if __name__ == "__main__":
         
         if newproj == 'y' or newproj =='Y':
             nftprojectid=create_project(namelistr)
-        shutil.rmtree(metadataloc)
-        os.mkdir(metadataloc)
+
         shutil.rmtree(imageloc)
         os.mkdir(imageloc)
 
