@@ -17,21 +17,15 @@ import shutil
 import numpy as np
 
 #edit project details in the create project fucntion variable "project"
- 
-apikey= str(input(" Enter NFTMAKERAPI key:   "))
+
 
 os.system('cls||clear')
 
 countaaa=0
 
-metadataloc=''
+metadataloc='' 
+apikey= str(input(" Enter NFTMAKERAPI key:   "))
 imageloc=str(input(" Enter location to save NFTs:   "))+'/'
-
-
-
-
-
-
 folder = input(" Enter location of Layers:   ")
 
 
