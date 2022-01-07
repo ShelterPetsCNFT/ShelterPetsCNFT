@@ -1,8 +1,8 @@
 ### Hi there 👋
 
 Welcome to ShelterPets: <br />
-10,000 Hand drawn Dog and Cat #CNFTs launching on Cardano  <br />
-50% of all revenue to charity! goal of ₳ 250,000 for community chosen donations!  <br />
+We are a animal charity driven project on Cardano!  <br />
+50% of all revenue to charity! goal of ₳ 250,000 donated!  <br />
 
 Check out or "whitepaper" here!  <br />
  <br />
@@ -19,6 +19,16 @@ Check out or "whitepaper" here!  <br />
   <br />
   <br />
   Other files include:  <br />
+   <br />
+   
+   
+   NFTMAKERUPLOADER - program to upload and generate nft set for nftmaker pro
+   
+   
+   
+   <br /> 
+  
+  CSV's
 NumericItemCount.CSV - Contains the number of each items occurs in all of the ShelterPets  <br />
 ShelterPetsItemList.CSV - Contains the complete item list for all ShelterPets  <br />
 ShelterPetsItemRarityList.CSV - Contains the complete rarity list for all ShelterPets   <br />
