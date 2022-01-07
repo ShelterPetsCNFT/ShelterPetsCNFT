@@ -29,7 +29,7 @@ imageloc=str(input(" Enter location to save NFTs:   "))+'/'
 folder = input(" Enter location of Layers:   ")
 
 
-
+imagesize= int(input("Input image output dimension (eg if 400x400 put 400):   "))
 
 
 def create_project(namelistr):
@@ -126,7 +126,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
                 main_composite = Image.alpha_composite(main_composite, remaining)
 
             rgb_im = main_composite.convert('RGB')
-            maxsize=(1500,1500)
+            maxsize=(imagesize,imagesize)
             rgb_im.thumbnail(maxsize)
             nftname=projectname+str(namenumber[countaaa]).zfill(4)
 
