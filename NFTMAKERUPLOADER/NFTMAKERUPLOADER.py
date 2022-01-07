@@ -160,6 +160,7 @@ if yesno=='yes' or yesno=='yes' or yesno=='Yes' or yesno=='Y'or yesno=='y':
     projectname=input('Base name for NFT (ShelterPets for example): ')
     newproj=input('New project: Y/N?  ')
     if newproj != 'y' and newproj !='Y':
+       print('(existing project should be empty)')
        nftprojectid=input('Input NFT-MAKER Project ID:  ')
        
     a={
@@ -189,7 +190,7 @@ if yesno=='yes' or yesno=='yes' or yesno=='Yes' or yesno=='Y'or yesno=='y':
     
     if newproj == 'y' or newproj =='Y':
         nftprojectid=create_project(namelistr)
-
+    
     shutil.rmtree(imageloc)
     os.mkdir(imageloc)
 
