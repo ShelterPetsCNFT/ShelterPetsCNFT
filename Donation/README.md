@@ -8,3 +8,4 @@ TOTAL: 384 ADA
   <br />
 160 ADA to Pariah Dog Koh Samui - https://t.co/JOJnHRCJqc 01/03/2021
   <br />
+160 ADA to Pariah Dog Koh Samui - https://t.co/p4toVf5GJZ 01/08/2021
