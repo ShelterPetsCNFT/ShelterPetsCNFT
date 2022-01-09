@@ -1,5 +1,5 @@
 import requests
-import pandas
+import pandas as pd
 import time
 import sys
 import requests
@@ -15,22 +15,41 @@ import json
 import os
 import shutil
 import numpy as np
-
+import csv
 #edit project details in the create project fucntion variable "project"
 
-
+import pprint
 os.system('cls||clear')
 
-countaaa=0
 
-metadataloc='' 
+##config input used for testing, can be activate##
+# fileloc=input('Location of user config:  ')
+        
+# inputs = []
+# with open(fileloc, newline='') as inputfile:
+    # for row in csv.reader(inputfile):
+        # inputs.append(row[0])
+
+# print(inputs)          
+
+
+# apikey= inputs[0]
+# customerid= inputs[1]
+
+# imageloc=str(inputs[2])+'/'
+# folder = inputs[3]
+
+
+
 apikey= str(input(" Enter NFTMAKERAPI key:   "))
+customerid= str(input(" Enter Customer-Id key:   "))
+
 imageloc=str(input(" Enter location to save NFTs:   "))+'/'
 folder = input(" Enter location of Layers:   ")
 
 
 imagesize= int(input("Input image output dimension (eg if 400x400 put 400):   "))
-
+  
 
 def create_project(namelistr):
 
@@ -53,8 +72,9 @@ def create_project(namelistr):
             headername=input('Header name:  ')
             metvalue=input(f'Value for {headername}:  ')
             metadatastring['721']['<policy_id>']['<asset_name>'][headername]=f'{metvalue}'
-            print(metadatastring)
-    
+            print('\n')
+            pprint.pprint(metadatastring)
+            print('\n')
     namer=input('NFTMAKER Project Name:  ')
     project={
           "projectname": str(namer),
@@ -69,6 +89,7 @@ def create_project(namelistr):
         }
 
     r = requests.post(f'https://api.nft-maker.io/CreateProject/{apikey}', json=project)
+    
     print(r.json()['projectId'])
     return r.json()['projectId']
 
@@ -88,21 +109,42 @@ def create_new_image(all_images, config):
         return new_image
 
 
-def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, metadataloc, imageloc,projectname):
+def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero):
 
     trait_files = {}
     for trait in config["layers"]:
         trait_files[trait["name"]] = {}
         for x, key in enumerate(trait["values"]):
             trait_files[trait["name"]][key] = trait["filename"][x];
+    if previousimage==1:
+        
+        metaname=input(f'Is {str(projectname)}metadata.json the correct filename from previous upload? Y/N?  ')
+        if metaname == 'y' or metaname =='Y':  
+            f = open(str(projectname+'metadata.json'))
+        
+        elif metaname == 'n' or metaname =='N': 
 
-    all_images = []
+            fileloc1=input('Location of previous image metadata:  ')
+            f = open(str(fileloc1))
+         
+        else:
+            print('something went wrong')
+            time.sleep(5)
+            exit()
+            
+        data = json.load(f)
+        all_images = data
+        counter=len(data)
+    else:
+        all_images = []
+        counter=0
+        
     for i in range(amount): 
         new_trait_image = create_new_image(all_images, config)
         all_images.append(new_trait_image)
 
 
-    for item in all_images:
+    for item in all_images[counter:]:
   
         for i in range(0,int(traitcount)):
             
@@ -128,7 +170,10 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
             rgb_im = main_composite.convert('RGB')
             maxsize=(imagesize,imagesize)
             rgb_im.thumbnail(maxsize)
-            nftname=projectname+str(namenumber[countaaa]).zfill(4)
+            
+
+            
+            nftname=projectname+str(countaaa).zfill(leadingzero)
 
             file_name = nftname + ".png"
             print(file_name)
@@ -143,7 +188,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
             a['previewImageNft']['fileFromBase64']=data1.decode('utf-8')
         
         r = requests.post(f'https://api.nft-maker.io/UploadNft/{apikey}/{nftprojectid}', json=a)
-
+    return all_images
  
 
   
@@ -160,7 +205,7 @@ if yesno=='yes' or yesno=='yes' or yesno=='Yes' or yesno=='Y'or yesno=='y':
     projectname=input('Base name for NFT (ShelterPets for example): ')
     newproj=input('New project: Y/N?  ')
     if newproj != 'y' and newproj !='Y':
-       print('(existing project should be empty)')
+
        nftprojectid=input('Input NFT-MAKER Project ID:  ')
        
     a={
@@ -190,16 +235,18 @@ if yesno=='yes' or yesno=='yes' or yesno=='Yes' or yesno=='Y'or yesno=='y':
     
     if newproj == 'y' or newproj =='Y':
         nftprojectid=create_project(namelistr)
-    
+        previousimage=0
+    else:
+        previousimage=1
     shutil.rmtree(imageloc)
     os.mkdir(imageloc)
 
 
     totalimages=int(input("total images:  "))
     totalimages=totalimages+1
-    
-    
-    namenumber=random.sample(range(1,totalimages,1), totalimages-1)
+    leadingzero=int(input('How many leading zeros in nft name?  '))
+    leadingzero=leadingzero+1
+    #namenumber=random.sample(range(1,totalimages,1), totalimages-1)
     
     traitnames=[]
     sub_folders2=[]
@@ -321,8 +368,17 @@ if yesno=='yes' or yesno=='yes' or yesno=='Yes' or yesno=='Y'or yesno=='y':
 
 
 
+    countaa= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
+    countaaa=countaa.json()['total']+1
+    keyindex=countaaa+1
+    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero)   
 
-    generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,metadataloc,imageloc,projectname)   
+
+    
+    with open(projectname+'metadata.json', 'w') as fout:
+        json.dump(outputmeta, fout)
+
+    print('metadata list printed to '+ str(projectname)+'metadata.json in current directory')
     print('Upload Complete')
     press=input('Hit enter to Exit')
 
