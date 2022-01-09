@@ -6,5 +6,7 @@ Step by step guide can be found in the PDF.
 
 
 <br><br>
+Instructions here:
+https://medium.com/@shelterpetscnft/nft-maker-pro-uploader-created-by-shelterpets-a61bde6f9e23
 
-An exe version can be found at: https://www.dropbox.com/s/9fjym1xvz6i0fnl
+An exe version can be found at: https://www.dropbox.com/s/12jbcqq74cqbgpz/
