@@ -1,4 +1,4 @@
-#### THIS IS FULL REALEASE V04 ##########
+
 import pandas as pd
 import time
 import sys
@@ -59,8 +59,19 @@ def create_project(namelistr):
 
         
  
-    for namer in namelistr:
-        metadatastring['721']['<policy_id>']['<asset_name>'][namer]=f'<{namer}>'
+    listoflist=input('Do you want all variable metadata values stored in a single header? Y/N  ')
+    if listoflist=='y' or listoflist=='Y':
+        metalistheader=str(input('Input name of metadata header:  '))
+        tempdic={}
+        for namer in namelistr:
+            tempdic[namer]=f'<{namer}>'
+        metadatastring['721']['<policy_id>']['<asset_name>'][metalistheader]=tempdic
+    else:
+    
+        for namer in namelistr:
+            metadatastring['721']['<policy_id>']['<asset_name>'][namer]=f'<{namer}>'
+    
+    
     
     admeta=input('additional constant metadata values (not based on layers)? Y/N  ')
     if admeta=='y' or admeta == 'Y':
@@ -73,6 +84,11 @@ def create_project(namelistr):
             print('\n')
             pprint.pprint(metadatastring)
             print('\n')
+    
+    
+    
+    
+    
     namer=input('NFTMAKER Project Name:  ')
     project={
           "projectname": str(namer),
@@ -418,6 +434,7 @@ try:
         
         
         data = outputmeta
+        names=data[0].keys()
         counter=len(data)
         totalcounter=[]
 
@@ -428,16 +445,22 @@ try:
                 counts.append(data[i][f'{key}'])
             
             totalcounter.append(Counter(counts[:]))
-
+        tempnames=[]
+        for tempname in names:
+            tempnames.append(tempname)
+        ii=0
         #print(totalcounter)
         for count in totalcounter:
             
+            
+            print(tempnames[ii])
+            print('\n')
             for key, value in count.items():
                 print(key, '{:.2%}'.format(value/counter))
-
-        
+            print('\n')
+        ii=ii+1
         stop()
-
+        press=input('Hit enter to exit')
 
 
 
