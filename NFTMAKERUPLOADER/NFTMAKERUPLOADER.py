@@ -1,4 +1,5 @@
-### this is NFTMAKERUPLOADER V05 ########
+
+import pandas as pd
 import time
 import sys
 import requests
@@ -36,7 +37,7 @@ os.system('cls||clear')
 import sys, traceback, logging
 
 logging.basicConfig(level=logging.ERROR)
-
+uploadyn=input('Do you want to upload to NFTMAKER? (0 for no, 1 for yes) ')
 
 apikey= str(input(" Enter NFTMAKERAPI key:   "))
 customerid= str(input(" Enter Customer-Id key:   "))
@@ -74,6 +75,7 @@ def create_project(namelistr):
     
     admeta=input('additional constant metadata values (not based on layers)? Y/N  ')
     if admeta=='y' or admeta == 'Y':
+        metalistheader=[]
         howmany=input('How many more?  ')
         metvalue=[]
         for tt in range(0,int(howmany)):
@@ -87,7 +89,7 @@ def create_project(namelistr):
     
     
     
-    
+    metadatastringexport=metadatastring
     namer=input('NFTMAKER Project Name:  ')
     project={
           "projectname": str(namer),
@@ -104,8 +106,40 @@ def create_project(namelistr):
     r = requests.post(f'https://api.nft-maker.io/CreateProject/{apikey}', json=project)
     
     print(r.json()['projectId'])
-    return r.json()['projectId']
+    return r.json()['projectId'],listoflist, metadatastringexport, metalistheader
+    
+    
+def create_meta(item, listoflist, metadatastring, metalistheader, nftname):
 
+    metadatastring={"721": {"<policy_id>": {"<asset_name>":{}, "version": "1.0"}}}
+        
+        
+    filler={"name": nftname, "image": "<ipfs_link>", "mediaType": "<mime_type>",
+        
+         "files": [{"name": nftname, "mediaType": "<mime_type>", "src": "<ipfs_link>"}]}    
+    
+    
+    metadatastring['721']['<policy_id>']={"<asset_name>": {}, "version": "1.0"}
+    
+
+    
+    
+    if listoflist=='y' or listoflist=='Y':
+        tempdic={}
+        for items in item.keys():
+            tempdic[items]=f'{item[items]}'
+        filler[metalistheader]=tempdic
+        metadatastring['721']['<policy_id>']["<asset_name>"]=filler
+        
+    else:
+    
+        for items in item.keys():
+            filler[items]=f'{item[items]}'
+            metadatastring['721']['<policy_id>']["<asset_name>"]=filler
+            
+    return metadatastring
+    
+    
 def create_new_image(all_images, config):
     new_image = {}
     for layer in config["layers"]:
@@ -122,7 +156,7 @@ def create_new_image(all_images, config):
         return new_image
 
 
-def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero):
+def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname):
 
     trait_files = {}
     for trait in config["layers"]:
@@ -194,20 +228,29 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
 
             countaaa=countaaa+1
        
-        a['assetName']=nftname
-        with open(imageloc + nftname + ".png", "rb") as img_data:
+        a['assetName']=assetname+str(countaaa).zfill(leadingzero)
+        #print(projectname+str(countaaa).zfill(leadingzero))
+        a['previewImageNft']['displayname']=projectname+str(countaaa).zfill(leadingzero)
+        #assetname1=assetname+str(countaaa-1).zfill(leadingzero)
+        bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname)
+        metadatasave=bb
+        with open(imageloc + nftname +'.metadata', 'w') as outfile:
+            json.dump(metadatasave, outfile)
+        if uploadyn == 1:
+            with open(imageloc + nftname + ".png", "rb") as img_data:
+                
+                data1 = base64.b64encode(img_data.read())
+                a['previewImageNft']['fileFromBase64']=data1.decode('utf-8')
             
-            data1 = base64.b64encode(img_data.read())
-            a['previewImageNft']['fileFromBase64']=data1.decode('utf-8')
-        
-        r = requests.post(f'https://api.nft-maker.io/UploadNft/{apikey}/{nftprojectid}', json=a)
+            r = requests.post(f'https://api.nft-maker.io/UploadNft/{apikey}/{nftprojectid}', json=a)
+
     return all_images
  
 
 try:  
 
     print("Welcome to ShelterPets Uploader")
-    print("Are you wanting to upload an NFT?")   
+    print("Are you wanting to make an NFT collection?")   
 
 
 
@@ -216,7 +259,8 @@ try:
         
         
         
-        projectname=input('Base name for NFT (ShelterPets for example): ')
+        projectname=input('Display name for NFT (ShelterPets# for example): ')
+        assetname=input('Assetname for NFT (ShetlerPets for example):')
         newproj=input('New project: Y/N?  ')
         if newproj != 'y' and newproj !='Y':
 
@@ -227,6 +271,7 @@ try:
           "previewImageNft": {
             "mimetype": "image/png",
             "fileFromBase64": "string",
+            "displayname": "string",
             "metadataPlaceholder": [ 
             ]
           }
@@ -237,6 +282,7 @@ try:
         traitorder=[]
         traitcount=input('Number of traits:  ')
         metadataPlaceholder=[]
+
         print('enter traits from back to front')
         for i in range(0,int(traitcount)):
             name=input('name:  ')
@@ -245,10 +291,15 @@ try:
             d[f'{value}']=name
             metadataPlaceholder.append(d)
             d={}
+        
+        
+        value='name'
+        d[f'{value}']='name'
+        metadataPlaceholder.append(d)
         a['previewImageNft']['metadataPlaceholder']=metadataPlaceholder
         
         if newproj == 'y' or newproj =='Y':
-            nftprojectid=create_project(namelistr)
+            nftprojectid,listoflist, metadatastring, metalistheader=create_project(namelistr)
             previousimage=0
         else:
             previousimage=1
@@ -371,11 +422,10 @@ try:
 
         layersdict=  {
           "layers": layerslist
-            
           ,
           "incompatibilities": incompat,
           "baseURI": ".",
-          "name": "NFT #"
+          "name": str(assetname)
         }
 
 
@@ -385,7 +435,7 @@ try:
         countaa= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
         countaaa=countaa.json()['total']+1
         keyindex=countaaa+1
-        outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero)   
+        outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname)   
 
 
         
