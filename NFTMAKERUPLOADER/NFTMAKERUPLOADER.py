@@ -1,5 +1,4 @@
 
-import pandas as pd
 import time
 import sys
 import requests
