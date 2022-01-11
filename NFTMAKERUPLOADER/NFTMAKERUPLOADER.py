@@ -37,7 +37,7 @@ os.system('cls||clear')
 import sys, traceback, logging
 
 logging.basicConfig(level=logging.ERROR)
-uploadyn=input('Do you want to upload to NFTMAKER? (0 for no, 1 for yes) ')
+uploadyn=int(input('Do you want to upload to NFTMAKER? (0 for no, 1 for yes) '))
 
 apikey= str(input(" Enter NFTMAKERAPI key:   "))
 customerid= str(input(" Enter Customer-Id key:   "))
@@ -67,15 +67,15 @@ def create_project(namelistr):
             tempdic[namer]=f'<{namer}>'
         metadatastring['721']['<policy_id>']['<asset_name>'][metalistheader]=tempdic
     else:
-    
+        metalistheader=''
         for namer in namelistr:
             metadatastring['721']['<policy_id>']['<asset_name>'][namer]=f'<{namer}>'
-    
+            
     
     
     admeta=input('additional constant metadata values (not based on layers)? Y/N  ')
     if admeta=='y' or admeta == 'Y':
-        metalistheader=[]
+        
         howmany=input('How many more?  ')
         metvalue=[]
         for tt in range(0,int(howmany)):
@@ -88,7 +88,7 @@ def create_project(namelistr):
     
     
     
-    
+    metadatastringjson=json.dumps(metadatastring)
     metadatastringexport=metadatastring
     namer=input('NFTMAKER Project Name:  ')
     project={
@@ -99,7 +99,7 @@ def create_project(namelistr):
           "policyExpires": True,
           "policyLocksDateTime": "2022-12-31T21:33:38.286Z",
           "maxNftSupply": 1,
-          "metadata": str(metadatastring),
+          "metadata": str(metadatastringjson),
           "addressExpiretime": 20
         }
 
@@ -126,13 +126,15 @@ def create_meta(item, listoflist, metadatastring, metalistheader, nftname):
     
     if listoflist=='y' or listoflist=='Y':
         tempdic={}
+        filler={}
+        
         for items in item.keys():
             tempdic[items]=f'{item[items]}'
         filler[metalistheader]=tempdic
         metadatastring['721']['<policy_id>']["<asset_name>"]=filler
         
     else:
-    
+        filler={}
         for items in item.keys():
             filler[items]=f'{item[items]}'
             metadatastring['721']['<policy_id>']["<asset_name>"]=filler
@@ -156,7 +158,7 @@ def create_new_image(all_images, config):
         return new_image
 
 
-def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname):
+def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn):
 
     trait_files = {}
     for trait in config["layers"]:
@@ -435,7 +437,7 @@ try:
         countaa= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
         countaaa=countaa.json()['total']+1
         keyindex=countaaa+1
-        outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname)   
+        outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn)   
 
 
         
@@ -507,7 +509,7 @@ try:
             for key, value in count.items():
                 print(key, '{:.2%}'.format(value/counter))
             print('\n')
-        ii=ii+1
+            ii=ii+1
         stop()
         press=input('Hit enter to exit')
 
