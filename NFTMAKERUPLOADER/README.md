@@ -8,7 +8,7 @@ works only for generative sets, will add duplicate NFT and other support later.
 
 
 <br><br>
-Instructions here (this is not up to date, this is for v03, code is v05, update soon):
+Instructions here (this is not up to date, this is for v03, code is v08, update soon):
 https://medium.com/@shelterpetscnft/nft-maker-pro-uploader-created-by-shelterpets-a61bde6f9e23
 
 An exe version can be found at: https://www.dropbox.com/s/gseo2sa9k58gdqn
