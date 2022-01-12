@@ -49,7 +49,7 @@ folder = input(" Enter location of Layers:   ")
 imagesize= int(input("Input image output dimension (eg if 400x400 put 400):   "))
   
 
-def create_project(namelistr):
+def create_project(namelistr, newproj):
 
     metadatastring={"721": {"<policy_id>":
          {"<asset_name>": 
@@ -66,31 +66,36 @@ def create_project(namelistr):
         for namer in namelistr:
             tempdic[namer]=f'<{namer}>'
         metadatastring['721']['<policy_id>']['<asset_name>'][metalistheader]=tempdic
+        
     else:
         metalistheader=''
         for namer in namelistr:
             metadatastring['721']['<policy_id>']['<asset_name>'][namer]=f'<{namer}>'
             
     
-    
+
     admeta=input('additional constant metadata values (not based on layers)? Y/N  ')
     if admeta=='y' or admeta == 'Y':
         
         howmany=input('How many more?  ')
         metvalue=[]
+        headername=[]
         for tt in range(0,int(howmany)):
-            headername=input('Header name:  ')
-            metvalue=input(f'Value for {headername}:  ')
-            metadatastring['721']['<policy_id>']['<asset_name>'][headername]=f'{metvalue}'
+            headername.append(input('Header name:  '))
+            metvalue.append(input(f'Value for {headername[tt]}:  '))
+            metadatastring['721']['<policy_id>']['<asset_name>'][headername[tt]]=f'{metvalue[tt]}'
             print('\n')
             pprint.pprint(metadatastring)
             print('\n')
-    
+
     
     
     metadatastringjson=json.dumps(metadatastring)
     metadatastringexport=metadatastring
-    namer=input('NFTMAKER Project Name:  ')
+    if newproj == 'y' or newproj =='Y':
+        namer=input('NFTMAKER Project Name:  ')
+    else:
+        namer=''
     project={
           "projectname": str(namer),
           "description": "",
@@ -102,14 +107,17 @@ def create_project(namelistr):
           "metadata": str(metadatastringjson),
           "addressExpiretime": 20
         }
-
-    r = requests.post(f'https://api.nft-maker.io/CreateProject/{apikey}', json=project)
     
-    print(r.json()['projectId'])
-    return r.json()['projectId'],listoflist, metadatastringexport, metalistheader
+    if newproj == 'y' or newproj =='Y':
+        r = requests.post(f'https://api.nft-maker.io/CreateProject/{apikey}', json=project)
+        nftmakprojid=r.json()['projectId']
+        print(r.json()['projectId'])
+    else:
+        nftmakprojid=''
+    return nftmakprojid,listoflist, metadatastringexport, metalistheader,headername,metvalue
     
     
-def create_meta(item, listoflist, metadatastring, metalistheader, nftname):
+def create_meta(item, listoflist, metadatastring, metalistheader, nftname,headername,metvalue):
 
     metadatastring={"721": {"<policy_id>": {"<asset_name>":{}, "version": "1.0"}}}
         
@@ -126,19 +134,22 @@ def create_meta(item, listoflist, metadatastring, metalistheader, nftname):
     
     if listoflist=='y' or listoflist=='Y':
         tempdic={}
-        filler={}
+
         
         for items in item.keys():
             tempdic[items]=f'{item[items]}'
         filler[metalistheader]=tempdic
         metadatastring['721']['<policy_id>']["<asset_name>"]=filler
+        for tt in range(0,len(headername)):
+
+            metadatastring['721']['<policy_id>']['<asset_name>'][headername[tt]]=f'{metvalue[tt]}'
         
     else:
-        filler={}
+
         for items in item.keys():
             filler[items]=f'{item[items]}'
             metadatastring['721']['<policy_id>']["<asset_name>"]=filler
-            
+      
     return metadatastring
     
     
@@ -158,13 +169,15 @@ def create_new_image(all_images, config):
         return new_image
 
 
-def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn):
+def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn,headername,metvalue,loadmetadata,metalistheader):
 
     trait_files = {}
     for trait in config["layers"]:
         trait_files[trait["name"]] = {}
         for x, key in enumerate(trait["values"]):
             trait_files[trait["name"]][key] = trait["filename"][x];
+    
+    
     if previousimage==1:
         
         metaname=input(f'Is {str(projectname)}metadata.json the correct filename from previous upload? Y/N?  ')
@@ -184,6 +197,44 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         data = json.load(f)
         all_images = data
         counter=len(data)
+        print("loading metadata from nftmaker")
+    
+    
+    #loads metadata if no previous file is found
+    elif loadmetadata==1:
+        countmeta= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
+        countmeta=str(countmeta.json()['total'])
+
+
+        metanames=requests.get(f'https://api.nft-maker.io/GetNfts/{apikey}/{nftprojectid}/all/{countmeta}/1')
+                                 
+        nftmakerdata=[]
+        
+        for nn in range(0,len(metanames.json())):
+            nftid=metanames.json()[nn]['id']
+            tempdata=requests.get(f'https://api.nft-maker.io/GetNftDetailsById/{apikey}/{nftprojectid}/{nftid}')
+            
+
+            tempdata=tempdata.json()
+            aaa=json.loads(tempdata['metadata'])
+            plcyid=tempdata['policyid']
+            for key in aaa['721'][plcyid].keys():
+                asstnam=str(key)
+            #print(aaa['721'][plcyid].keys())
+            if metalistheader != '':
+                temper=aaa['721'][plcyid][asstnam][metalistheader]
+                nftmakerdata.append(temper)
+            else:
+                templist={}
+                for namer in namelistr:
+                    templist[namer]=aaa['721'][plcyid][asstnam][namer]
+                nftmakerdata.append(templist)
+        
+        all_images = nftmakerdata
+        counter=len(nftmakerdata)
+    
+    
+    
     else:
         all_images = []
         counter=0
@@ -230,11 +281,11 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
 
             countaaa=countaaa+1
        
-        a['assetName']=assetname+str(countaaa).zfill(leadingzero)
+        a['assetName']=assetname+str(countaaa-1).zfill(leadingzero)
         #print(projectname+str(countaaa).zfill(leadingzero))
         a['previewImageNft']['displayname']=projectname+str(countaaa).zfill(leadingzero)
         #assetname1=assetname+str(countaaa-1).zfill(leadingzero)
-        bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname)
+        bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname,headername,metvalue)
         metadatasave=bb
         with open(imageloc + nftname +'.metadata', 'w') as outfile:
             json.dump(metadatasave, outfile)
@@ -252,266 +303,275 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
 try:  
 
     print("Welcome to ShelterPets Uploader")
-    print("Are you wanting to make an NFT collection?")   
 
+    
+    
+    
+    projectname=input('Display name for NFT (ShelterPets# for example): ')
+    assetname=input('Assetname for NFT (ShetlerPets for example):')
+    newproj=input('New project: Y/N?  ')
+    if newproj != 'y' and newproj !='Y':
 
+       nftprojectid=input('Input NFT-MAKER Project ID:  ')
 
-    yesno=input('yes or no? ')
-    if yesno=='yes' or yesno=='yes' or yesno=='Yes' or yesno=='Y'or yesno=='y':
-        
-        
-        
-        projectname=input('Display name for NFT (ShelterPets# for example): ')
-        assetname=input('Assetname for NFT (ShetlerPets for example):')
-        newproj=input('New project: Y/N?  ')
-        if newproj != 'y' and newproj !='Y':
+       
+       
+    a={
+      "assetName": "string",
+      "previewImageNft": {
+        "mimetype": "image/png",
+        "fileFromBase64": "string",
+        "displayname": "string",
+        "metadataPlaceholder": [ 
+        ]
+      }
+    }
 
-           nftprojectid=input('Input NFT-MAKER Project ID:  ')
-           
-        a={
-          "assetName": "string",
-          "previewImageNft": {
-            "mimetype": "image/png",
-            "fileFromBase64": "string",
-            "displayname": "string",
-            "metadataPlaceholder": [ 
-            ]
-          }
-        }
+    d={}
+    namelistr=[]
+    traitorder=[]
+    traitcount=input('Number of traits:  ')
+    metadataPlaceholder=[]
 
-        d={}
-        namelistr=[]
-        traitorder=[]
-        traitcount=input('Number of traits:  ')
-        metadataPlaceholder=[]
-
-        print('enter traits from back to front')
-        for i in range(0,int(traitcount)):
-            name=input('name:  ')
-            namelistr.append(name)
-            value='name'
-            d[f'{value}']=name
-            metadataPlaceholder.append(d)
-            d={}
-        
-        
+    print('enter traits from back to front')
+    for i in range(0,int(traitcount)):
+        name=input('name:  ')
+        namelistr.append(name)
         value='name'
-        d[f'{value}']='name'
+        d[f'{value}']=name
         metadataPlaceholder.append(d)
-        a['previewImageNft']['metadataPlaceholder']=metadataPlaceholder
+        d={}
+    
+    loadmetadata=0
+    value='name'
+    d[f'{value}']='name'
+    metadataPlaceholder.append(d)
+    a['previewImageNft']['metadataPlaceholder']=metadataPlaceholder
+    
+    if newproj == 'y' or newproj =='Y':
+        nftprojectid,listoflist, metadatastring, metalistheader, headername,metvalue=create_project(namelistr,newproj)
+        previousimage=0
+    else:
         
-        if newproj == 'y' or newproj =='Y':
-            nftprojectid,listoflist, metadatastring, metalistheader=create_project(namelistr)
-            previousimage=0
-        else:
+        nftprojectid1,listoflist, metadatastring, metalistheader, headername,metvalue=create_project(namelistr,newproj)
+        
+        previousimage=input('Have you previously used this uploader before on this project? Y/N?  ')
+        if previousimage == 'y' or previousimage == 'y':
             previousimage=1
-        shutil.rmtree(imageloc)
-        os.mkdir(imageloc)
-
-
-        totalimages=int(input("total images:  "))
-        totalimages=totalimages+1
-        leadingzero=int(input('How many leading zeros in nft name?  '))
-        leadingzero=leadingzero+1
-        #namenumber=random.sample(range(1,totalimages,1), totalimages-1)
+        else:
         
-        traitnames=[]
-        sub_folders2=[]
-        sub_folders = [name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))]
-
-        sub_folders =namelistr
-        for i in range(0,len(sub_folders),1):
+            loadmetadata=1
+            previousimage=0
             
-            sub_folders2.append(folder+'/'+sub_folders[i])
-            
-
-        for j in range(0,len(sub_folders),1):
-                l=os.listdir(sub_folders2[j])
-                li=[x.split('.')[0] for x in l]
-                traitnames.append(li)
+    # shutil.rmtree(imageloc)
+    # os.mkdir(imageloc)
 
 
-        layerslist=[[] for i in range(len(sub_folders))]
-        weightrand=input('Random Weights ( True or False): ')
-        for k in range(0, len(sub_folders)):
-            
-            
-            size=(len(traitnames[k]))
+    totalimages=int(input("total images:  "))
+    totalimages=totalimages+1
+    leadingzero=int(input('How many leading zeros in nft name?  '))
+    leadingzero=leadingzero+1
+    #namenumber=random.sample(range(1,totalimages,1), totalimages-1)
+    
+    traitnames=[]
+    sub_folders2=[]
+    sub_folders = [name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))]
 
-            
-            if weightrand== 'True':
-                    weight=np.random.dirichlet(np.ones(len(traitnames[k])),size=1)*100
-                    weight=weight.tolist()
-                    layerslist[k]=   {
-                              "name": namelistr[k],
-                              "values": traitnames[k],
-                              "trait_path": sub_folders2[k],
-                              "filename": traitnames[k],
-                              "weights": weight[0]
-                            }
-            elif weightrand== 'False':
-                print(f'List of traits for {namelistr[k]}:')
+    sub_folders =namelistr
+    for i in range(0,len(sub_folders),1):
+        
+        sub_folders2.append(folder+'/'+sub_folders[i])
+        
+
+    for j in range(0,len(sub_folders),1):
+            l=os.listdir(sub_folders2[j])
+            li=[x.split('.')[0] for x in l]
+            traitnames.append(li)
+
+
+    layerslist=[[] for i in range(len(sub_folders))]
+    weightrand=input('Random Weights ( True or False): ')
+    for k in range(0, len(sub_folders)):
+        
+        
+        size=(len(traitnames[k]))
+
+        
+        if weightrand== 'True':
+                weight=np.random.dirichlet(np.ones(len(traitnames[k])),size=1)*100
+                weight=weight.tolist()
+                layerslist[k]=   {
+                          "name": namelistr[k],
+                          "values": traitnames[k],
+                          "trait_path": sub_folders2[k],
+                          "filename": traitnames[k],
+                          "weights": weight[0]
+                        }
+        elif weightrand== 'False':
+            print(f'List of traits for {namelistr[k]}:')
+            print('\n')
+            print(traitnames[k])
+            print('\n')
+            weight = [int(input(f'Enter weight values for Header: {namelistr[k]} and Trait: ({traitnames[k][qq]}): ')) for qq in range(size)]
+            if sum(weight)==100:
                 print('\n')
-                print(traitnames[k])
+                layerslist[k]=   {
+                          "name": namelistr[k],
+                          "values": traitnames[k],
+                          "trait_path": sub_folders2[k],
+                          "filename": traitnames[k],
+                          "weights": weight
+                        }
+            else:
+                print('Weight doesnt sum to 100')
                 print('\n')
+                print('try again: 1 more attempt or program will exit')
                 weight = [int(input(f'Enter weight values for Header: {namelistr[k]} and Trait: ({traitnames[k][qq]}): ')) for qq in range(size)]
                 if sum(weight)==100:
                     print('\n')
                     layerslist[k]=   {
-                              "name": namelistr[k],
-                              "values": traitnames[k],
-                              "trait_path": sub_folders2[k],
-                              "filename": traitnames[k],
-                              "weights": weight
-                            }
+                          "name": namelistr[k],
+                          "values": traitnames[k],
+                          "trait_path": sub_folders2[k],
+                          "filename": traitnames[k],
+                          "weights": weight
+                        }
                 else:
                     print('Weight doesnt sum to 100')
-                    print('\n')
-                    print('try again: 1 more attempt or program will exit')
-                    weight = [int(input(f'Enter weight values for Header: {namelistr[k]} and Trait: ({traitnames[k][qq]}): ')) for qq in range(size)]
-                    if sum(weight)==100:
-                        print('\n')
-                        layerslist[k]=   {
-                              "name": namelistr[k],
-                              "values": traitnames[k],
-                              "trait_path": sub_folders2[k],
-                              "filename": traitnames[k],
-                              "weights": weight
-                            }
-                    else:
-                        print('Weight doesnt sum to 100')
-                        time.sleep(10)
-                        exit()
-            else:
-                print('No option selected, exiting..')
-                time.sleep(10)
-                exit()
-            
-            
-            
-
-
-
-
-        incompat=[
-            # {
-            #   "layer": "Toy",
-            #   "value": "Mouse Gold",
-            #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
-            # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
-
-            # {
-            #   "layer": "Toy",
-            #   "value":"Mouse Gray", 
-            #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
-            # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
-            # {
-            #   "layer": "Toy",
-            #   "value": "Mouse Red",
-            #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
-            # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
-
-
-            # {
-            #   "layer": "Toy",
-            #   "value":  "Mouse White",
-            #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
-            # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
-
-          ]
-
-
-
-        layersdict=  {
-          "layers": layerslist
-          ,
-          "incompatibilities": incompat,
-          "baseURI": ".",
-          "name": str(assetname)
-        }
-
-
-
-
-
-        countaa= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
-        countaaa=countaa.json()['total']+1
-        keyindex=countaaa+1
-        outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn)   
-
-
-        
-        with open(projectname+'metadata.json', 'w') as fout:
-            json.dump(outputmeta, fout)
-
-        print('metadata list printed to '+ str(projectname)+'metadata.json in current directory')
-        print('Upload Complete')
-        press=input('Hit enter to view collection data')
-        
-        
-        class Transcript(object):
-
-            def __init__(self, filename):
-                self.terminal = sys.stdout
-                self.logfile = open(filename, "w")
-
-            def write(self, message):
-                self.terminal.write(message)
-                self.logfile.write(message)
-
-            def flush(self):
-                # this flush method is needed for python 3 compatibility.
-                # this handles the flush command by doing nothing.
-                # you might want to specify some extra behavior here.
-                pass
-
-        def start(filename):
-            """Start transcript, appending print output to given filename"""
-            sys.stdout = Transcript(filename)
-
-        def stop():
-            """Stop transcript and return print functionality to normal"""
-            sys.stdout.logfile.close()
-            sys.stdout = sys.stdout.terminal
-
-
-
-
-
-
-        start('Rarityinfo.txt')
+                    time.sleep(10)
+                    exit()
+        else:
+            print('No option selected, exiting..')
+            time.sleep(10)
+            exit()
         
         
         
-        
-        data = outputmeta
-        names=data[0].keys()
-        counter=len(data)
-        totalcounter=[]
 
-            
-        for key in data[0].keys():
-            counts=[]
-            for i in range(counter):
-                counts.append(data[i][f'{key}'])
-            
-            totalcounter.append(Counter(counts[:]))
-        tempnames=[]
-        for tempname in names:
-            tempnames.append(tempname)
-        ii=0
-        #print(totalcounter)
-        for count in totalcounter:
-            
-            
-            print(tempnames[ii])
-            print('\n')
-            for key, value in count.items():
-                print(key, '{:.2%}'.format(value/counter))
-            print('\n')
-            ii=ii+1
-        stop()
-        press=input('Hit enter to exit')
+
+
+
+    incompat=[
+        # {
+        #   "layer": "Toy",
+        #   "value": "Mouse Gold",
+        #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
+        # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
+
+        # {
+        #   "layer": "Toy",
+        #   "value":"Mouse Gray", 
+        #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
+        # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
+        # {
+        #   "layer": "Toy",
+        #   "value": "Mouse Red",
+        #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
+        # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
+
+
+        # {
+        #   "layer": "Toy",
+        #   "value":  "Mouse White",
+        #   "incompatible_with": ["Green Fish", "Orange Fish","Pink Fish"]
+        # },  #  Blue backgrounds will never have the attribute "Python Logo 2".
+
+      ]
+
+
+
+    layersdict=  {
+      "layers": layerslist
+      ,
+      "incompatibilities": incompat,
+      "baseURI": ".",
+      "name": str(assetname)
+    }
+
+
+
+
+    # if newproj == 'y' or newproj =='Y':
+        # countaa= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
+        # countaaa=countaa.json()['total']+1
+    # else:
+    countaaa=int(input('NFT name start number (for example, ShelterPets#005 would be 5):  '))
+        
+    keyindex=countaaa+1
+    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn, headername,metvalue, loadmetadata,metalistheader)   
+
+
+    
+    with open(projectname+'metadata.json', 'w') as fout:
+        json.dump(outputmeta, fout)
+
+    print('metadata list printed to '+ str(projectname)+'metadata.json in current directory')
+    print('Upload Complete')
+    press=input('Hit enter to view collection data')
+    
+    
+    class Transcript(object):
+
+        def __init__(self, filename):
+            self.terminal = sys.stdout
+            self.logfile = open(filename, "w")
+
+        def write(self, message):
+            self.terminal.write(message)
+            self.logfile.write(message)
+
+        def flush(self):
+            # this flush method is needed for python 3 compatibility.
+            # this handles the flush command by doing nothing.
+            # you might want to specify some extra behavior here.
+            pass
+
+    def start(filename):
+        """Start transcript, appending print output to given filename"""
+        sys.stdout = Transcript(filename)
+
+    def stop():
+        """Stop transcript and return print functionality to normal"""
+        sys.stdout.logfile.close()
+        sys.stdout = sys.stdout.terminal
+
+
+
+
+
+
+    start('Rarityinfo.txt')
+    
+    
+
+    data = outputmeta
+    names=data[0].keys()
+    counter=len(data)
+    totalcounter=[]
+
+        
+    for key in data[0].keys():
+        counts=[]
+        for i in range(counter):
+            counts.append(data[i][f'{key}'])
+        
+        totalcounter.append(Counter(counts[:]))
+    tempnames=[]
+    for tempname in names:
+        tempnames.append(tempname)
+    ii=0
+    #print(totalcounter)
+    for count in totalcounter:
+        
+        
+        print(tempnames[ii])
+        print('\n')
+        for key, value in count.items():
+            print(key, '{:.2%}'.format(value/counter))
+        print('\n')
+        ii=ii+1
+    stop()
+    press=input('Hit enter to exit')
 
 
 
