@@ -7,7 +7,7 @@ We are a animal charity driven project on Cardano!  <br />
  ₳ 1000 ADA donated so far!
  <br />
 
-Check out or "whitepaper" here!  <br />
+
  <br />
  <br />
  <br />
