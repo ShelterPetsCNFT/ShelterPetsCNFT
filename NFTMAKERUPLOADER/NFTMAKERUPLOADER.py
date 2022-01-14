@@ -1,4 +1,4 @@
-
+## updated 1/14/2022
 import time
 import sys
 import requests
@@ -282,7 +282,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
        
         a['assetName']=assetname+str(countaaa-1).zfill(leadingzero)
         #print(projectname+str(countaaa).zfill(leadingzero))
-        a['previewImageNft']['displayname']=projectname+str(countaaa).zfill(leadingzero)
+        a['previewImageNft']['displayname']=projectname+str(countaaa-1).zfill(leadingzero)
         #assetname1=assetname+str(countaaa-1).zfill(leadingzero)
         bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname,headername,metvalue)
         metadatasave=bb
