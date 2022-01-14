@@ -3,6 +3,9 @@
 Welcome to ShelterPets: <br />
 We are a animal charity driven project on Cardano!  <br />
 50% of all revenue to charity! goal of ₳ 250,000 donated!  <br />
+ <br />
+ ₳ 1000 ADA donated so far!
+ <br />
 
 Check out or "whitepaper" here!  <br />
  <br />
