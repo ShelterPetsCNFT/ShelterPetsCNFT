@@ -1,4 +1,4 @@
-TOTAL: 544 ADA
+TOTAL: 1000 ADA
   <br />
   <br />
   <br />
