@@ -11,7 +11,7 @@ We are a animal charity driven project on Cardano!  <br />
  <br />
  <br />
  <br />
-  Join here for discussion of ShelterPEts and related Codes etc. 
+  Join here for discussion of ShelterPets and related Codes etc. 
  <br />
  http://discord.gg/CBHRSdyK5c
  <br />
