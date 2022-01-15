@@ -7,7 +7,7 @@ We are a animal charity driven project on Cardano!  <br />
  ₳ 1000 ADA donated so far!
  <br />
 
-
+IF any project want to make collaborative donations, we can provide ShelterPets CNFTS at mint price ( 4 ADA) for every 27 ADA donated (ShelterPets team takes 0%).
  <br />
  <br />
  <br />
