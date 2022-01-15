@@ -1,5 +1,5 @@
 Pariah Dog Koh Samui expenses
-42.63 ADA/thb
+42.63 thb/ADA
 
  <br />
 Rent each 6 months 20,000thb/469.15 ADA.
