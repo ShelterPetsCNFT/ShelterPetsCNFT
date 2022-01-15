@@ -3,9 +3,12 @@ NFTMAKER UPLOADER
 Run the python script and follow the prompts. 
 
 
-
+Please consider purchasing an NFT if you utilize this code for your project. 
 
 <br><br>
+IF any project want to make collaborative donations, we can provide ShelterPets CNFTS at mint price ( 4 ADA) for every 27 ADA donated (ShelterPets team takes 0%).
+
+
 <br><br>
 
 
