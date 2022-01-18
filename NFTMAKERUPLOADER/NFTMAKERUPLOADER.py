@@ -1,11 +1,11 @@
-## updated 1/14/2022
+## updated 1/18/2022
 import time
 import sys
 import requests
 import base64
 from io import BytesIO
 import requests, json 
-from PIL import Image
+from PIL import Image,ImageEnhance
 import random
 import os
 import shutil
@@ -86,7 +86,9 @@ def create_project(namelistr, newproj):
             print('\n')
             pprint.pprint(metadatastring)
             print('\n')
-
+    else:
+        metvalue=[]
+        headername=[]
     
     
     metadatastringjson=json.dumps(metadatastring)
@@ -168,7 +170,19 @@ def create_new_image(all_images, config):
         return new_image
 
 
-def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn,headername,metvalue,loadmetadata,metalistheader):
+def reduce_opacity(im, opacity):
+    """Returns an image with reduced opacity."""
+    assert opacity >= 0 and opacity <= 1
+    if im.mode != 'RGBA':
+        im = im.convert('RGBA')
+    else:
+        im = im.copy()
+    alpha = im.split()[3]
+    alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
+    im.putalpha(alpha)
+    return im
+
+def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn,headername,metvalue,loadmetadata,metalistheader,newproj,layeropac):
 
     trait_files = {}
     for trait in config["layers"]:
@@ -200,7 +214,10 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
     
     
     #loads metadata if no previous file is found
-    elif loadmetadata==1:
+    elif loadmetadata=='y' or loadmetadata=='y':
+        if newproj != 'y' and newproj !='Y':
+        
+            nftprojectid=input('Input NFT-MAKER Project ID:  ')
         countmeta= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
         countmeta=str(countmeta.json()['total'])
 
@@ -256,7 +273,9 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
             if attr != 'tokenId':
                 layers.append([])
                 layers[index] = Image.open(f'{config["layers"][index]["trait_path"]}/{trait_files[attr][item[attr]]}.png').convert('RGBA')
+                layers[index]=reduce_opacity(layers[index], layeropac[index]/255)
 
+                
         if len(layers) >= 3:
             main_composite = Image.alpha_composite(layers[0], layers[1])
             layers.pop(0)
@@ -310,8 +329,8 @@ try:
     assetname=input('Assetname for NFT (ShetlerPets for example):')
     newproj=input('New project: Y/N?  ')
     if newproj != 'y' and newproj !='Y':
-
-       nftprojectid=input('Input NFT-MAKER Project ID:  ')
+        if uploadyn == 1: 
+            nftprojectid=input('Input NFT-MAKER Project ID:  ')
 
        
        
@@ -341,7 +360,7 @@ try:
         metadataPlaceholder.append(d)
         d={}
     
-    loadmetadata=0
+
     value='name'
     d[f'{value}']='name'
     metadataPlaceholder.append(d)
@@ -359,7 +378,7 @@ try:
             previousimage=1
         else:
         
-            loadmetadata=1
+            loadmetadata=input('Do you want to load and check a NFTMAKER projects metadata? Y/N?  ')
             previousimage=0
             
     # shutil.rmtree(imageloc)
@@ -390,6 +409,16 @@ try:
 
     layerslist=[[] for i in range(len(sub_folders))]
     weightrand=input('Random Weights ( True or False): ')
+    opac=input('Opacity values for layers? Y/N?  ')
+    layeropac=[]
+    if opac=='y' or opac=='Y':
+        for tempnamelist in namelistr:
+            layeropac.append(int(input(f'Enter alpha values for Header: {tempnamelist} (between 0, 255)  ')))
+    
+    
+    
+    
+    
     for k in range(0, len(sub_folders)):
         
         
@@ -497,7 +526,7 @@ try:
     countaaa=int(input('NFT name start number (for example, ShelterPets#005 would be 5):  '))
         
     keyindex=countaaa+1
-    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn, headername,metvalue, loadmetadata,metalistheader)   
+    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn, headername,metvalue, loadmetadata,metalistheader,newproj,layeropac)   
 
 
     
@@ -587,3 +616,4 @@ except:
     print("program closing in 25 seconds...")
     time.sleep(25)
     stop()
+
