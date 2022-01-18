@@ -16,7 +16,7 @@ Please read through and understand the full code before using it or parts of it.
 
 UPLOAD SCRIPT
  <br />
-
+(OUT OF DATE USE NFTMAKERUPLOADER)
 This script will generate an nft set based on layers and weight of layers. it will then create a project on nftmaker and upload the files. 
 
 make sure to arranage folders/pictures correctly
