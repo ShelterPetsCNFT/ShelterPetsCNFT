@@ -35,11 +35,13 @@ os.system('cls||clear')
 import sys, traceback, logging
 
 logging.basicConfig(level=logging.ERROR)
-uploadyn=int(input('Do you want to upload to NFTMAKER? (0 for no, 1 for yes) '))
-
-apikey= str(input(" Enter NFTMAKERAPI key:   "))
-customerid= str(input(" Enter Customer-Id key:   "))
-
+uploadyn=int(input('Do you need any NFTMAKER usage? (0 for no, 1 for yes) '))
+if uploadyn==1:
+    nftmakers=int(input('Do you want to upload to NFTMAKER? (0 for no, 1 for yes) '))
+    if nftmakers ==1 :
+        apikey= str(input(" Enter NFTMAKERAPI key:   "))
+        customerid= str(input(" Enter Customer-Id key:   ")) 
+        
 imageloc=str(input(" Enter location to save NFTs:   "))+'/'
 folder = input(" Enter location of Layers:   ")
 
@@ -320,7 +322,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
 
 try:  
 
-    print("Welcome to ShelterPets Uploader")
+    print("Welcome to ShelterPets Cardano NFT Generator")
 
     
     
