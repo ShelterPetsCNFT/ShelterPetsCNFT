@@ -13,7 +13,7 @@ import csv
 #edit project details in the create project fucntion variable "project"
 from collections import Counter
 import pprint
-os.system('cls||clear')
+#os.system('cls||clear')
 
 
 ##config input used for testing, can be activate##
