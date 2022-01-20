@@ -2,7 +2,7 @@ Cardano NFT Generator
 
 Run the python script and follow the prompts. 
 
-USE AT OWN RISK! ALWAYS CHECK RESULTING METADATA AND IMAGES!
+USE AT OWN RISK! ALWAYS CHECK RESULTING METADATA AND IMAGES BEFORE MINTING!
 
 
 Please consider purchasing an NFT if you utilize this code. 
