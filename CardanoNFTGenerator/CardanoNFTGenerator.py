@@ -1,3 +1,5 @@
+#updated 1/24/2022 10:17 CST
+
 import time
 import sys
 import requests
@@ -13,7 +15,7 @@ import csv
 #edit project details in the create project fucntion variable "project"
 from collections import Counter
 import pprint
-#os.system('cls||clear')
+os.system('cls||clear')
 
 
 ##config input used for testing, can be activate##
@@ -60,6 +62,7 @@ def create_project(namelistr, newproj):
         
  
     listoflist=input('Do you want all variable metadata values stored in a single header? Y/N  ')
+    
     if listoflist=='y' or listoflist=='Y':
         metalistheader=str(input('Input name of metadata header:  '))
         tempdic={}
@@ -80,6 +83,7 @@ def create_project(namelistr, newproj):
         howmany=input('How many more?  ')
         metvalue=[]
         headername=[]
+        print('63 character limit for values')
         for tt in range(0,int(howmany)):
             headername.append(input('Header name:  '))
             metvalue.append(input(f'Value for {headername[tt]}:  '))
@@ -151,12 +155,21 @@ def create_meta(item, listoflist, metadatastring, metalistheader, nftname,header
         for items in item.keys():
             filler[items]=f'{item[items]}'
             metadatastring['721']['<policy_id>']["<asset_name>"]=filler
+        for tt in range(0,len(headername)):
+
+            metadatastring['721']['<policy_id>']['<asset_name>'][headername[tt]]=f'{metvalue[tt]}'
+          
+      
+        
       
     return metadatastring
     
     
 def create_new_image(all_images, config):
     new_image = {}
+       
+    
+    
     for layer in config["layers"]:
         new_image[layer["name"]] = random.choices(layer["values"], layer["weights"])[0]
     
@@ -277,8 +290,38 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
                 if opac=='y' or opac=='Y':
                     layers[index]=reduce_opacity(layers[index], layeropac[index]/255)
 
-                
-        if len(layers) >= 3:
+        
+        if len(layers) == 1:
+            rgb_im = layers[0].convert('RGB')
+            maxsize=(imagesize,imagesize)
+            rgb_im.thumbnail(maxsize)
+            
+
+            
+            nftname=projectname+str(countaaa).zfill(leadingzero)
+
+            file_name = nftname + ".png"
+            print(file_name)
+            rgb_im.save(imageloc + file_name)
+
+            countaaa=countaaa+1
+       
+        elif len(layers) == 2:
+            main_composite = Image.alpha_composite(layers[0], layers[1])
+            rgb_im = main_composite.convert('RGB')
+            maxsize=(imagesize,imagesize)
+            rgb_im.thumbnail(maxsize)
+            
+
+            
+            nftname=projectname+str(countaaa).zfill(leadingzero)
+
+            file_name = nftname + ".png"
+            print(file_name)
+            rgb_im.save(imageloc + file_name)
+
+            countaaa=countaaa+1        
+        elif len(layers) >= 3:
             main_composite = Image.alpha_composite(layers[0], layers[1])
             layers.pop(0)
             layers.pop(0)
@@ -308,7 +351,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname,headername,metvalue)
         metadatasave=bb
         with open(imageloc + nftname +'.metadata', 'w') as outfile:
-            json.dump(metadatasave, outfile)
+            json.dump(metadatasave, outfile,indent=2)
         if uploadyn == 1:
             with open(imageloc + nftname + ".png", "rb") as img_data:
                 
@@ -324,12 +367,16 @@ try:
 
     print("Welcome to ShelterPets Cardano NFT Generator")
 
-    
+    import sys
+    sys.setrecursionlimit(1500)
     
     
     projectname=input('Display name for NFT (ShelterPets# for example): ')
     assetname=input('Assetname for NFT (ShetlerPets for example):')
-    newproj=input('New project: Y/N?  ')
+    if uploadyn==1:
+        newproj=input('New project: Y/N?  ')
+    else:
+        newproj=''
     if newproj != 'y' and newproj !='Y':
         if uploadyn == 1: 
             nftprojectid=input('Input NFT-MAKER Project ID:  ')
