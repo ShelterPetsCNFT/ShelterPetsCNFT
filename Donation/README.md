@@ -1,4 +1,4 @@
-TOTAL: 1500 ADA
+TOTAL: 1760 ADA
   <br />
   <br />
   <br />
@@ -32,3 +32,15 @@ TOTAL: 1500 ADA
   <br />
 + 72 ADA to HAZELpool - https://cardanoscan.io/transaction/eda3988e3d3a228edf82237d4617b9ab5e6b293d9cedf0dc2e8a2cccbdc9f72a 01/18/2021 
   <br />
++ 160 ADA to Pariah Dog Koh Samui - https://cardanoscan.io/transaction/3aa3cfa1766a0c80588f9e5bcf994e143fe73c0046207466de738018abc22c06 01/24/2021 
+  <br />
++ 100 ADA to HAZELpool - https://cardanoscan.io/transaction/69e67ca327f8b1e62076f914024a5fda2beecb8156054281747d9c01663a7346 01/24/2021 
+  <br />
+  
+  
+  
+  
+  
+  
+
+
