@@ -1,4 +1,4 @@
-#updated 1/24/2022 10:17 CST
+#updated 02/04/2022 10:17 CST
 
 import time
 import sys
@@ -91,6 +91,23 @@ def create_project(namelistr, newproj):
             print('\n')
             pprint.pprint(metadatastring)
             print('\n')
+    
+    removemeta=input('Remove layer values from metadata? Y/N  ')
+    if removemeta=='y' or removemeta == 'Y':
+        headername1=[]
+        conta=0
+        howmany=input('How many?  ')
+        for tt in range(0,int(howmany)):
+            headername1.append(input('Header name:  '))
+            del metadatastring['721']['<policy_id>']['<asset_name>'][headername1[conta]]
+            print('\n')
+            pprint.pprint(metadatastring)
+            print('\n')    
+            conta=conta+1
+    
+    
+    
+    
     else:
         metvalue=[]
         headername=[]
@@ -120,7 +137,7 @@ def create_project(namelistr, newproj):
         print(r.json()['projectId'])
     else:
         nftmakprojid=''
-    return nftmakprojid,listoflist, metadatastringexport, metalistheader,headername,metvalue
+    return nftmakprojid,listoflist, metadatastringexport, metalistheader,headername,metvalue,headername1
     
     
 def create_meta(item, listoflist, metadatastring, metalistheader, nftname,headername,metvalue):
@@ -196,7 +213,7 @@ def reduce_opacity(im, opacity):
     im.putalpha(alpha)
     return im
 
-def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn,headername,metvalue,loadmetadata,metalistheader,newproj,layeropac,nftprojectid):
+def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn,headername,metvalue,loadmetadata,metalistheader,newproj,layeropac,nftprojectid,headername1):
 
     trait_files = {}
     for trait in config["layers"]:
@@ -347,9 +364,18 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         a['assetName']=assetname+str(countaaa-1).zfill(leadingzero)
         #print(projectname+str(countaaa).zfill(leadingzero))
         a['previewImageNft']['displayname']=projectname+str(countaaa-1).zfill(leadingzero)
+        for i in range(0,int(traitcount)):
+            if (a['previewImageNft']['metadataPlaceholder'][i]['name'] in headername1):
+            
+                del a['previewImageNft']['metadataPlaceholder'][i]
+        
+        
         #assetname1=assetname+str(countaaa-1).zfill(leadingzero)
         bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname,headername,metvalue)
         metadatasave=bb
+        for head in headername1:
+            del metadatasave['721']['<policy_id>']['<asset_name>'][head]
+        
         with open(imageloc + nftname +'.metadata', 'w') as outfile:
             json.dump(metadatasave, outfile,indent=2)
         if uploadyn == 1:
@@ -416,11 +442,11 @@ try:
     a['previewImageNft']['metadataPlaceholder']=metadataPlaceholder
     
     if newproj == 'y' or newproj =='Y':
-        nftprojectid,listoflist, metadatastring, metalistheader, headername,metvalue=create_project(namelistr,newproj)
+        nftprojectid,listoflist, metadatastring, metalistheader, headername,metvalue,headername1=create_project(namelistr,newproj)
         previousimage=0
     else:
         nftprojectid=''
-        nftprojectid1,listoflist, metadatastring, metalistheader, headername,metvalue=create_project(namelistr,newproj)
+        nftprojectid1,listoflist, metadatastring, metalistheader, headername,metvalue, headername1=create_project(namelistr,newproj)
         
         previousimage=input('Have you previously used this uploader before on this project? Y/N?  ')
         if previousimage == 'y' or previousimage == 'y':
@@ -576,7 +602,7 @@ try:
     countaaa=int(input('NFT name start number (for example, ShelterPets#005 would be 5):  '))
         
     keyindex=countaaa+1
-    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn, headername,metvalue, loadmetadata,metalistheader,newproj,layeropac,nftprojectid)   
+    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn, headername,metvalue, loadmetadata,metalistheader,newproj,layeropac,nftprojectid,headername1)   
 
 
     
@@ -663,6 +689,10 @@ try:
 except:
     logging.exception("Something has gone wrong, please evaluate the error listed below")
     time.sleep(5)
+    print("program closing in 25 seconds...")
+    time.sleep(25)
+    stop()
+
     print("program closing in 25 seconds...")
     time.sleep(25)
     stop()
