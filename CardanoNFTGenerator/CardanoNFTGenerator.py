@@ -4,18 +4,15 @@ import time
 import sys
 import requests
 import base64
-from io import BytesIO
-import requests, json 
+import  json 
 from PIL import Image,ImageEnhance
 import random
 import os
-import shutil
 import numpy as np
-import csv
 #edit project details in the create project fucntion variable "project"
 from collections import Counter
 import pprint
-os.system('cls||clear')
+import  logging
 
 
 ##config input used for testing, can be activate##
@@ -34,7 +31,7 @@ os.system('cls||clear')
 
 # imageloc=str(inputs[2])+'/'
 # folder = inputs[3]
-import sys, traceback, logging
+
 
 logging.basicConfig(level=logging.ERROR)
 uploadyn=int(input('Do you need any NFTMAKER usage? (0 for no, 1 for yes) '))
@@ -48,7 +45,8 @@ imageloc=str(input(" Enter location to save NFTs:   "))+'/'
 folder = input(" Enter location of Layers:   ")
 
 
-imagesize= int(input("Input image output dimension (eg if 400x400 put 400):   "))
+imagesize1= int(input("Input image output dimension 1 (eg if 400x800 put 400):   "))
+imagesize2= int(input("Input image output dimension 2 (eg if 400x800 put 800):   "))
   
 
 def create_project(namelistr, newproj):
@@ -91,26 +89,42 @@ def create_project(namelistr, newproj):
             print('\n')
             pprint.pprint(metadatastring)
             print('\n')
+    else:
+        metvalue=[]
+        headername=[]    
+        headername1=[]
     
     removemeta=input('Remove layer values from metadata? Y/N  ')
     if removemeta=='y' or removemeta == 'Y':
-        headername1=[]
-        conta=0
-        howmany=input('How many?  ')
-        for tt in range(0,int(howmany)):
-            headername1.append(input('Header name:  '))
-            del metadatastring['721']['<policy_id>']['<asset_name>'][headername1[conta]]
-            print('\n')
-            pprint.pprint(metadatastring)
-            print('\n')    
-            conta=conta+1
+        if listoflist=='y' or listoflist=='Y':
+            
+            headername1=[]
+            conta=0
+            howmany=input('How many?  ')
+            for tt in range(0,int(howmany)):
+                headername1.append(input('Header name:  '))
+                del metadatastring['721']['<policy_id>']['<asset_name>'][metalistheader][headername1[conta]]
+                print('\n')
+                pprint.pprint(metadatastring)
+                print('\n')    
+                conta=conta+1
+        
+        
+        else:
+            headername1=[]
+
+            conta=0
+            howmany=input('How many?  ')
+            for tt in range(0,int(howmany)):
+                headername1.append(input('Header name:  '))
+                del metadatastring['721']['<policy_id>']['<asset_name>'][headername1[conta]]
+                print('\n')
+                pprint.pprint(metadatastring)
+                print('\n')    
+                conta=conta+1
     
     
-    
-    
-    else:
-        metvalue=[]
-        headername=[]
+
     
     
     metadatastringjson=json.dumps(metadatastring)
@@ -213,7 +227,7 @@ def reduce_opacity(im, opacity):
     im.putalpha(alpha)
     return im
 
-def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn,headername,metvalue,loadmetadata,metalistheader,newproj,layeropac,nftprojectid,headername1):
+def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlaceholder,namelistr,traitcount, imageloc,projectname,previousimage,leadingzero, assetname,uploadyn,headername,metvalue,loadmetadata,metalistheader,newproj,layeropac,nftprojectid,headername1,listoflist):
 
     trait_files = {}
     for trait in config["layers"]:
@@ -293,7 +307,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
 
     for item in all_images[counter:]:
   
-        for i in range(0,int(traitcount)):
+        for i in range(0,len(a['previewImageNft']['metadataPlaceholder'])):
             
             a['previewImageNft']['metadataPlaceholder'][i]['value']=item[namelistr[i]]
             
@@ -310,7 +324,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         
         if len(layers) == 1:
             rgb_im = layers[0].convert('RGB')
-            maxsize=(imagesize,imagesize)
+            maxsize=(imagesize1,imagesize2)
             rgb_im.thumbnail(maxsize)
             
 
@@ -326,7 +340,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         elif len(layers) == 2:
             main_composite = Image.alpha_composite(layers[0], layers[1])
             rgb_im = main_composite.convert('RGB')
-            maxsize=(imagesize,imagesize)
+            maxsize=(imagesize1,imagesize2)
             rgb_im.thumbnail(maxsize)
             
 
@@ -348,7 +362,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
                 main_composite = Image.alpha_composite(main_composite, remaining)
 
             rgb_im = main_composite.convert('RGB')
-            maxsize=(imagesize,imagesize)
+            maxsize=(imagesize1,imagesize2)
             rgb_im.thumbnail(maxsize)
             
 
@@ -364,12 +378,14 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         a['assetName']=assetname+str(countaaa-1).zfill(leadingzero)
         #print(projectname+str(countaaa).zfill(leadingzero))
         a['previewImageNft']['displayname']=projectname+str(countaaa-1).zfill(leadingzero)
-        for i in range(0,int(traitcount)):
+        
+        for i in range(0,len(a['previewImageNft']['metadataPlaceholder'])):
             if (a['previewImageNft']['metadataPlaceholder'][i]['name'] in headername1):
             
                 del a['previewImageNft']['metadataPlaceholder'][i]
-        
-        
+
+                
+                
         #assetname1=assetname+str(countaaa-1).zfill(leadingzero)
         bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname,headername,metvalue)
         metadatasave=bb
@@ -436,9 +452,9 @@ try:
         d={}
     
     loadmetadata=''
-    value='name'
-    d[f'{value}']='name'
-    metadataPlaceholder.append(d)
+    # value='name'
+    # d[f'{value}']='name'
+    # metadataPlaceholder.append(d)
     a['previewImageNft']['metadataPlaceholder']=metadataPlaceholder
     
     if newproj == 'y' or newproj =='Y':
@@ -516,7 +532,7 @@ try:
             print('\n')
             print(traitnames[k])
             print('\n')
-            weight = [int(input(f'Enter weight values for Header: {namelistr[k]} and Trait: ({traitnames[k][qq]}): ')) for qq in range(size)]
+            weight = [float(input(f'Enter weight values for Header: {namelistr[k]} and Trait: ({traitnames[k][qq]}): ')) for qq in range(size)]
             if sum(weight)==100:
                 print('\n')
                 layerslist[k]=   {
@@ -530,7 +546,7 @@ try:
                 print('Weight doesnt sum to 100')
                 print('\n')
                 print('try again: 1 more attempt or program will exit')
-                weight = [int(input(f'Enter weight values for Header: {namelistr[k]} and Trait: ({traitnames[k][qq]}): ')) for qq in range(size)]
+                weight = [float(input(f'Enter weight values for Header: {namelistr[k]} and Trait: ({traitnames[k][qq]}): ')) for qq in range(size)]
                 if sum(weight)==100:
                     print('\n')
                     layerslist[k]=   {
@@ -602,7 +618,7 @@ try:
     countaaa=int(input('NFT name start number (for example, ShelterPets#005 would be 5):  '))
         
     keyindex=countaaa+1
-    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn, headername,metvalue, loadmetadata,metalistheader,newproj,layeropac,nftprojectid,headername1)   
+    outputmeta=generate_unique_images(a,totalimages-1, layersdict,countaaa,traitorder,metadataPlaceholder, namelistr,traitcount,imageloc,projectname,previousimage,leadingzero, assetname, uploadyn, headername,metvalue, loadmetadata,metalistheader,newproj,layeropac,nftprojectid,headername1,listoflist)   
 
 
     
@@ -693,6 +709,3 @@ except:
     time.sleep(25)
     stop()
 
-    print("program closing in 25 seconds...")
-    time.sleep(25)
-    stop()
