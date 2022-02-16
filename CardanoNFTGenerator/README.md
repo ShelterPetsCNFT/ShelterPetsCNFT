@@ -1,3 +1,10 @@
+Parallel with gif is the most recent (v3 as i have called it)
+<br><br>
+
+Please consider purchasing an NFT if you utilize this code. 
+<br><br>
+
+
 Cardano NFT Generator
 
 Run the python script and follow the prompts. 
