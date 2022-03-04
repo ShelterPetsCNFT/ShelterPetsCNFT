@@ -5,36 +5,32 @@ import sys
 import requests
 import base64
 import  json 
-from PIL import Image,ImageEnhance
+from PIL import Image,ImageEnhance, ImageSequence
 import random
 import os
 import numpy as np
-#edit project details in the create project fucntion variable "project"
 from collections import Counter
 import pprint
 import  logging
+from joblib import Parallel, delayed
+import multiprocessing
 
 
-##config input used for testing, can be activate##
-# fileloc=input('Location of user config:  ')
-        
-# inputs = []
-# with open(fileloc, newline='') as inputfile:
-    # for row in csv.reader(inputfile):
-        # inputs.append(row[0])
-
-# print(inputs)          
 
 
-# apikey= inputs[0]
-# customerid= inputs[1]
 
-# imageloc=str(inputs[2])+'/'
-# folder = inputs[3]
+
+#edit project details in the create project function variable "project"
+
+
+
+
 
 
 logging.basicConfig(level=logging.ERROR)
 uploadyn=int(input('Do you need any NFTMAKER usage? (0 for no, 1 for yes) '))
+print('NFTMAKER disabled by deafualt. Edit code to enable')
+uploadyn=0
 if uploadyn==1:
     nftmakers=int(input('Do you want to upload to NFTMAKER? (0 for no, 1 for yes) '))
     if nftmakers ==1 :
@@ -45,12 +41,29 @@ imageloc=str(input(" Enter location to save NFTs:   "))+'/'
 folder = input(" Enter location of Layers:   ")
 
 
+if imageloc[0:5]=='\u202a':
+    imageloc.strip("\u202a")
+if folder[0:5]=='\u202a':
+        folder.strip("\u202a")
+
+
 imagesize1= int(input("Input image output dimension 1 (eg if 400x800 put 400):   "))
 imagesize2= int(input("Input image output dimension 2 (eg if 400x800 put 800):   "))
-  
 
+
+
+gifs=int(input('input 1 if there are gifs, 0 if not: '))
+if gifs==1:
+                                   
+    gifindex=int(input('input gif index: '))
+    gifontop=int(input('input 1 if gif on top, zero otherwise: '))  
+else:
+    gifindex=''
+    gifontop=''
+    
+    
 def create_project(namelistr, newproj):
-
+    
     metadatastring={"721": {"<policy_id>":
          {"<asset_name>": 
         {"name": "<display_name>", "image": "<ipfs_link>", "mediaType": "<mime_type>",
@@ -90,15 +103,16 @@ def create_project(namelistr, newproj):
             pprint.pprint(metadatastring)
             print('\n')
     else:
+        
         metvalue=[]
         headername=[]    
-        headername1=[]
     
     removemeta=input('Remove layer values from metadata? Y/N  ')
     if removemeta=='y' or removemeta == 'Y':
         if listoflist=='y' or listoflist=='Y':
             
             headername1=[]
+
             conta=0
             howmany=input('How many?  ')
             for tt in range(0,int(howmany)):
@@ -124,7 +138,9 @@ def create_project(namelistr, newproj):
                 conta=conta+1
     
     
+    else:
 
+        headername1=[]
     
     
     metadatastringjson=json.dumps(metadatastring)
@@ -154,7 +170,7 @@ def create_project(namelistr, newproj):
     return nftmakprojid,listoflist, metadatastringexport, metalistheader,headername,metvalue,headername1
     
     
-def create_meta(item, listoflist, metadatastring, metalistheader, nftname,headername,metvalue):
+def create_meta(item, listoflist, metadatastring, metalistheader, nftname,headername,metvalue, assetname):
 
     metadatastring={"721": {"<policy_id>": {"<asset_name>":{}, "version": "1.0"}}}
         
@@ -191,8 +207,10 @@ def create_meta(item, listoflist, metadatastring, metalistheader, nftname,header
             metadatastring['721']['<policy_id>']['<asset_name>'][headername[tt]]=f'{metvalue[tt]}'
           
       
-        
-      
+    # assetnamedic = metadatastring['721']['<policy_id>']['<asset_name>']   
+    # del metadatastring['721']['<policy_id>']
+    # metadatastring['721']['<policy_id>']={assetname: assetnamedic, "version": "1.0"}
+    
     return metadatastring
     
     
@@ -203,11 +221,16 @@ def create_new_image(all_images, config):
     
     for layer in config["layers"]:
         new_image[layer["name"]] = random.choices(layer["values"], layer["weights"])[0]
+
+
+
     
     for incomp in config["incompatibilities"]:
         for attr in new_image:
             if new_image[incomp["layer"]] == incomp["value"] and new_image[attr] in incomp["incompatible_with"]:
                 return create_new_image(all_images, config)
+
+
 
     if new_image in all_images:
         return create_new_image(all_images, config)
@@ -258,7 +281,7 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         print("loading metadata from nftmaker")
     
     
-    #loads metadata if no previous file is found
+
     elif loadmetadata=='y' or loadmetadata=='y':
         if newproj != 'y' and newproj !='Y':
         
@@ -281,7 +304,6 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
             plcyid=tempdata['policyid']
             for key in aaa['721'][plcyid].keys():
                 asstnam=str(key)
-            #print(aaa['721'][plcyid].keys())
             if metalistheader != '':
                 temper=aaa['721'][plcyid][asstnam][metalistheader]
                 nftmakerdata.append(temper)
@@ -299,14 +321,50 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
     else:
         all_images = []
         counter=0
-        
+    namenum=[] 
+    nameimage=[]
     for i in range(amount): 
         new_trait_image = create_new_image(all_images, config)
         all_images.append(new_trait_image)
+        namenum.append(i+countaaa)
+        nameimage.append([i+countaaa,new_trait_image])    
+    
+    
+    
+    names1=all_images[0].keys()
+    counter2=len(all_images)
+    totalcounter2=[]
 
+        
+    for key in all_images[0].keys():
+        counts2=[]
+        for i in range(counter2):
+            counts2.append(all_images[i][f'{key}'])
+        
+        totalcounter2.append(Counter(counts2[:]))
+    tempnames=[]
+    for tempname in names1:
+        tempnames.append(tempname)
+    ii=0
+    for count in totalcounter2:
+        
+        
+        print(tempnames[ii])
+        print('\n')
+        for key, value in count.items():
+            print(key, '{:.2%}'.format(value/counter2))
+        print('\n')
+        ii=ii+1
+    
+    input('These are the resulting weights, Press Enter to generate images')
+    print('images are generating (and uploading if selected)...')
+    
 
-    for item in all_images[counter:]:
-  
+    
+    def imagesaver(inputlist):
+        
+        item=inputlist[1]
+        namenum=inputlist[0]
         for i in range(0,len(a['previewImageNft']['metadataPlaceholder'])):
             
             a['previewImageNft']['metadataPlaceholder'][i]['value']=item[namelistr[i]]
@@ -317,67 +375,240 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
 
             if attr != 'tokenId':
                 layers.append([])
-                layers[index] = Image.open(f'{config["layers"][index]["trait_path"]}/{trait_files[attr][item[attr]]}.png').convert('RGBA')
+                if gifs==1 and index==gifindex:
+                    layers[index] = Image.open(f'{config["layers"][index]["trait_path"]}/{trait_files[attr][item[attr]]}.gif')
+                else:
+                    layers[index] = Image.open(f'{config["layers"][index]["trait_path"]}/{trait_files[attr][item[attr]]}.png').convert('RGBA')
                 if opac=='y' or opac=='Y':
                     layers[index]=reduce_opacity(layers[index], layeropac[index]/255)
 
         
         if len(layers) == 1:
-            rgb_im = layers[0].convert('RGB')
-            maxsize=(imagesize1,imagesize2)
-            rgb_im.thumbnail(maxsize)
             
+            if gifs==1:
+                
+                rgb_im = layers[0].convert('RGB')
+                maxsize=(imagesize1,imagesize2)
+                rgb_im.thumbnail(maxsize)
+                
+    
+                
+                nftname=projectname+str(namenum).zfill(leadingzero)
+    
+                file_name = nftname + ".gif"
+                print(file_name, flush=True)
+                rgb_im.save(imageloc + file_name, save_all=True, append_images=rgb_im[1:], duration=250, loop=0)
+            
+            else:
+            
+                rgb_im = layers[0].convert('RGB')
+                maxsize=(imagesize1,imagesize2)
+                rgb_im.thumbnail(maxsize)
+                
+    
+                
+                nftname=projectname+str(namenum).zfill(leadingzero)
+    
+                file_name = nftname + ".png"
+                print(file_name, flush=True)
+                rgb_im.save(imageloc + file_name)
 
             
-            nftname=projectname+str(countaaa).zfill(leadingzero)
-
-            file_name = nftname + ".png"
-            print(file_name)
-            rgb_im.save(imageloc + file_name)
-
-            countaaa=countaaa+1
        
         elif len(layers) == 2:
-            main_composite = Image.alpha_composite(layers[0], layers[1])
-            rgb_im = main_composite.convert('RGB')
-            maxsize=(imagesize1,imagesize2)
-            rgb_im.thumbnail(maxsize)
             
-
             
-            nftname=projectname+str(countaaa).zfill(leadingzero)
+            if gifs==1:
+                if gifontop==1:
+                    
+                    imagelayer   = layers[0]#.convert('RGBA')
+                   
+                    animated_gif = layers[1]
+                    
+                    all_frames = []
+                    
+                    for gif_frame in ImageSequence.Iterator(animated_gif):
+                    
+                        # duplicate background image because we will change it
+                        new_frame = imagelayer.copy()  
+                    
+                        # need to convert from `P` to `RGBA` to use it in `paste()` as mask for transparency
+                        gif_frame = gif_frame.convert('RGBA')  
+                    
+                        # paste on background using mask to get transparency 
+                        new_frame.paste(gif_frame, mask=gif_frame) 
+                        
+                        all_frames.append(new_frame)
+                        
+                    # save all frames as animated gif
+                    
+                    
 
-            file_name = nftname + ".png"
-            print(file_name)
-            rgb_im.save(imageloc + file_name)
+                        
+                    # save all frames as animated gif
+                    
+                    nftname=projectname+str(namenum).zfill(leadingzero)
+                    rgb_im = all_frames[0].convert('RGB')
+                    file_name = nftname + ".gif"
+                    rgb_im.save(imageloc + file_name, save_all=True, append_images=all_frames, duration=200, loop=0)
+                
+                
+                
+                
+                elif gifontop==0:
+                    imagelayer   = layers[1]#.convert('RGBA')
+                   
+                    animated_gif = layers[0]
+                    
+                    all_frames = []
+                    
+                    for gif_frame in ImageSequence.Iterator(animated_gif):
+                    
+                        # duplicate background image because we will change it
+                        new_frame = imagelayer.copy()  
+                    
+                        # need to convert from `P` to `RGBA` to use it in `paste()` as mask for transparency
+                        gif_frame = gif_frame.convert('RGBA')  
+                    
+                        # paste on background using mask to get transparency 
+                        gif_frame.paste(new_frame, mask=new_frame) 
+                        
+                        all_frames.append(gif_frame)
+                        
+                    # save all frames as animated gif
+                        
+                    nftname=projectname+str(namenum).zfill(leadingzero)
+                    rgb_im = all_frames[0].convert('RGB')
+                    file_name = nftname + ".gif"
+                    print(file_name, flush=True)
+                    rgb_im.save(imageloc + file_name, save_all=True, append_images=all_frames[1:], duration=200, loop=0)
+            
+            
+            else:
+                    
+            
+                main_composite = Image.alpha_composite(layers[0], layers[1])
+                rgb_im = main_composite.convert('RGB')
+                maxsize=(imagesize1,imagesize2)
+                rgb_im.thumbnail(maxsize)
+                
+    
+                
+                nftname=projectname+str(namenum).zfill(leadingzero)
+    
+                file_name = nftname + ".png"
+                print(file_name, flush=True)
+                rgb_im.save(imageloc + file_name)
 
-            countaaa=countaaa+1        
+                 
         elif len(layers) >= 3:
-            main_composite = Image.alpha_composite(layers[0], layers[1])
-            layers.pop(0)
-            layers.pop(0)
-
-            for index, remaining in enumerate(layers):
-
-                main_composite = Image.alpha_composite(main_composite, remaining)
-
-            rgb_im = main_composite.convert('RGB')
-            maxsize=(imagesize1,imagesize2)
-            rgb_im.thumbnail(maxsize)
             
-
             
-            nftname=projectname+str(countaaa).zfill(leadingzero)
+            
+            if gifs==1:
+                
+                main_composite = Image.alpha_composite(layers[0], layers[1])
+                layers.pop(0)
+                layers.pop(0)
+    
+                for index, remaining in enumerate(layers[:-1]):
+    
+                    main_composite = Image.alpha_composite(main_composite, remaining)
+                    
+                    
+                if gifontop==1:
+                    
+                    imagelayer   = main_composite
+                   
+                    animated_gif = layers[-1]
+                    
+                    all_frames = []
+                    
+                    for gif_frame in ImageSequence.Iterator(animated_gif):
+                    
+                        # duplicate background image because we will change it
+                        new_frame = imagelayer.copy()  
+                    
+                        # need to convert from `P` to `RGBA` to use it in `paste()` as mask for transparency
+                        gif_frame = gif_frame.convert('RGBA')  
+                    
+                        # paste on background using mask to get transparency 
+                        new_frame.paste(gif_frame, mask=gif_frame) 
+                        
+                        all_frames.append(new_frame)
+                        
+                    # save all frames as animated gif
+                    
+                    
 
-            file_name = nftname + ".png"
-            print(file_name)
-            rgb_im.save(imageloc + file_name)
+                        
+                    # save all frames as animated gif
+                    
+                    nftname=projectname+str(namenum).zfill(leadingzero)
+                    rgb_im = all_frames[0].convert('RGB')
+                    file_name = nftname + ".gif"
+                    rgb_im.save(imageloc + file_name, save_all=True, append_images=all_frames, duration=200, loop=0)
+                
+                
+                
+                
+                elif gifontop==0:
+                    imagelayer   = main_composite
+                   
+                    animated_gif = layers[-1]
+                    
+                    all_frames = []
+                    
+                    for gif_frame in ImageSequence.Iterator(animated_gif):
+                    
+                        # duplicate background image because we will change it
+                        new_frame = imagelayer.copy()  
+                    
+                        # need to convert from `P` to `RGBA` to use it in `paste()` as mask for transparency
+                        gif_frame = gif_frame.convert('RGBA')  
+                    
+                        # paste on background using mask to get transparency 
+                        gif_frame.paste(new_frame, mask=new_frame) 
+                        
+                        all_frames.append(gif_frame)
+                        
+                    # save all frames as animated gif
+                        
+                    nftname=projectname+str(namenum).zfill(leadingzero)
+                    rgb_im = all_frames[0].convert('RGB')
+                    file_name = nftname + ".gif"
+                    print(file_name, flush=True)
+                    rgb_im.save(imageloc + file_name, save_all=True, append_images=all_frames[1:], duration=200, loop=0)
+            
+            
+            else:
+            
+            
+            
+                main_composite = Image.alpha_composite(layers[0], layers[1])
+                layers.pop(0)
+                layers.pop(0)
+    
+                for index, remaining in enumerate(layers):
+    
+                    main_composite = Image.alpha_composite(main_composite, remaining)
+    
+                rgb_im = main_composite.convert('RGB')
+                maxsize=(imagesize1,imagesize2)
+                rgb_im.thumbnail(maxsize)
+                
+    
+                
+                nftname=projectname+str(namenum).zfill(leadingzero)
+    
+                file_name = nftname + ".png"
+                print(file_name, flush=True)
+                rgb_im.save(imageloc + file_name)
 
-            countaaa=countaaa+1
+           
        
-        a['assetName']=assetname+str(countaaa-1).zfill(leadingzero)
-        #print(projectname+str(countaaa).zfill(leadingzero))
-        a['previewImageNft']['displayname']=projectname+str(countaaa-1).zfill(leadingzero)
+        a['assetName']=assetname+str(namenum).zfill(leadingzero)
+        a['previewImageNft']['displayname']=projectname+str(namenum).zfill(leadingzero)
         
         for i in range(0,len(a['previewImageNft']['metadataPlaceholder'])):
             if (a['previewImageNft']['metadataPlaceholder'][i]['name'] in headername1):
@@ -385,9 +616,8 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
                 del a['previewImageNft']['metadataPlaceholder'][i]
 
                 
-                
-        #assetname1=assetname+str(countaaa-1).zfill(leadingzero)
-        bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname,headername,metvalue)
+
+        bb=create_meta(item, listoflist, metadatastring,metalistheader,nftname,headername,metvalue, assetname)
         metadatasave=bb
         for head in headername1:
             del metadatasave['721']['<policy_id>']['<asset_name>'][head]
@@ -395,13 +625,40 @@ def generate_unique_images(a,amount, config,countaaa,traitorder,metadataPlacehol
         with open(imageloc + nftname +'.metadata', 'w') as outfile:
             json.dump(metadatasave, outfile,indent=2)
         if uploadyn == 1:
-            with open(imageloc + nftname + ".png", "rb") as img_data:
-                
-                data1 = base64.b64encode(img_data.read())
-                a['previewImageNft']['fileFromBase64']=data1.decode('utf-8')
             
-            r = requests.post(f'https://api.nft-maker.io/UploadNft/{apikey}/{nftprojectid}', json=a)
+            if gifs==1:
+                with open(imageloc + nftname + ".gif", "rb") as img_data:
+                    
+                    data1 = base64.b64encode(img_data.read())
+                    a['previewImageNft']['fileFromBase64']=data1.decode('utf-8')
+                    errorsapi=[]
+                    r=requests.post(f'https://api.nft-maker.io/UploadNft/{apikey}/{nftprojectid}', json=a)
+                    if r.ok:
+                        pass
+                    else:
+                        errorsapi.append(f'{imageloc}{nftname}.png')
+            
+            else:
+            
+                with open(imageloc + nftname + ".png", "rb") as img_data:
+                    
+                    data1 = base64.b64encode(img_data.read())
+                    a['previewImageNft']['fileFromBase64']=data1.decode('utf-8')
+                errorsapi=[]
+                r=requests.post(f'https://api.nft-maker.io/UploadNft/{apikey}/{nftprojectid}', json=a)
+                if r.ok:
+                    pass
+                else:
+                    errorsapi.append(f'{imageloc}{nftname}.png')
+        return 
 
+    num_cores = multiprocessing.cpu_count()
+    Parallel(n_jobs=num_cores)(delayed(imagesaver)(xx) for xx in nameimage[counter:])
+    
+    
+
+    
+    
     return all_images
  
 
@@ -409,7 +666,6 @@ try:
 
     print("Welcome to ShelterPets Cardano NFT Generator")
 
-    import sys
     sys.setrecursionlimit(1500)
     
     
@@ -424,17 +680,28 @@ try:
             nftprojectid=input('Input NFT-MAKER Project ID:  ')
 
        
-       
-    a={
-      "assetName": "string",
-      "previewImageNft": {
-        "mimetype": "image/png",
-        "fileFromBase64": "string",
-        "displayname": "string",
-        "metadataPlaceholder": [ 
-        ]
-      }
-    }
+    if gifs==1:
+        a={
+          "assetName": "string",
+          "previewImageNft": {
+            "mimetype": "image/gif",
+            "fileFromBase64": "string",
+            "displayname": "string",
+            "metadataPlaceholder": [ 
+            ]
+          }
+        }
+    else:
+        a={
+          "assetName": "string",
+          "previewImageNft": {
+            "mimetype": "image/png",
+            "fileFromBase64": "string",
+            "displayname": "string",
+            "metadataPlaceholder": [ 
+            ]
+          }
+        }
 
     d={}
     namelistr=[]
@@ -473,15 +740,13 @@ try:
             loadmetadata=input('Do you want to load and check a NFTMAKER projects metadata? Y/N?  ')
             previousimage=0
             
-    # shutil.rmtree(imageloc)
-    # os.mkdir(imageloc)
 
 
     totalimages=int(input("total images:  "))
     totalimages=totalimages+1
     leadingzero=int(input('How many leading zeros in nft name?  '))
     leadingzero=leadingzero+1
-    #namenumber=random.sample(range(1,totalimages,1), totalimages-1)
+
     
     traitnames=[]
     sub_folders2=[]
@@ -508,16 +773,13 @@ try:
             layeropac.append(int(input(f'Enter alpha values for Header: {tempnamelist} (between 0, 255)  ')))
     
     
-    
-    
-    
     for k in range(0, len(sub_folders)):
         
         
         size=(len(traitnames[k]))
 
         
-        if weightrand== 'True':
+        if weightrand== 'True' or weightrand== 'true' or weightrand== 't':
                 weight=np.random.dirichlet(np.ones(len(traitnames[k])),size=1)*100
                 weight=weight.tolist()
                 layerslist[k]=   {
@@ -527,7 +789,7 @@ try:
                           "filename": traitnames[k],
                           "weights": weight[0]
                         }
-        elif weightrand== 'False':
+        elif weightrand== 'False' or weightrand== 'false' or weightrand== 'f':
             print(f'List of traits for {namelistr[k]}:')
             print('\n')
             print(traitnames[k])
@@ -561,17 +823,15 @@ try:
                     time.sleep(10)
                     exit()
         else:
-            print('No option selected, exiting..')
+            print('No option selected for weights, exiting..')
             time.sleep(10)
             exit()
         
         
-        
-
-
-
 
     incompat=[
+        
+        
         # {
         #   "layer": "Toy",
         #   "value": "Mouse Gold",
@@ -598,8 +858,13 @@ try:
 
       ]
 
+    # for incomp in config["incompatibilities"]:
+    #     for attr in new_image:
+    #         if new_image[incomp["layer"]] == incomp["value"] and new_image[attr] in incomp["incompatible_with"]:
+    #             return create_new_image(all_images, config)
 
-
+            
+            
     layersdict=  {
       "layers": layerslist
       ,
@@ -609,12 +874,6 @@ try:
     }
 
 
-
-
-    # if newproj == 'y' or newproj =='Y':
-        # countaa= requests.get(f'https://api.nft-maker.io/GetProjectDetails/{apikey}/{customerid}/{nftprojectid}')
-        # countaaa=countaa.json()['total']+1
-    # else:
     countaaa=int(input('NFT name start number (for example, ShelterPets#005 would be 5):  '))
         
     keyindex=countaaa+1
@@ -627,79 +886,37 @@ try:
 
     print('metadata list printed to '+ str(projectname)+'metadata.json in current directory')
     print('Upload Complete')
-    press=input('Hit enter to view collection data')
+    press=input('Hit enter to save collection rarity data')
     
     
-    class Transcript(object):
-
-        def __init__(self, filename):
-            self.terminal = sys.stdout
-            self.logfile = open(filename, "w")
-
-        def write(self, message):
-            self.terminal.write(message)
-            self.logfile.write(message)
-
-        def flush(self):
-            # this flush method is needed for python 3 compatibility.
-            # this handles the flush command by doing nothing.
-            # you might want to specify some extra behavior here.
-            pass
-
-    def start(filename):
-        """Start transcript, appending print output to given filename"""
-        sys.stdout = Transcript(filename)
-
-    def stop():
-        """Stop transcript and return print functionality to normal"""
-        sys.stdout.logfile.close()
-        sys.stdout = sys.stdout.terminal
-
-
-
-
-
-
-    start('Rarityinfo.txt')
+    with open('Rarityinfo.txt','w') as outfile:
+        data = outputmeta
+        names=data[0].keys()
+        counter=len(data)
+        totalcounter=[]
     
+            
+        for key in data[0].keys():
+            counts=[]
+            for i in range(counter):
+                counts.append(data[i][f'{key}'])
+            
+            totalcounter.append(Counter(counts[:]))
+        tempnames=[]
+        for tempname in names:
+            tempnames.append(tempname)
+        ii=0
+        for count in totalcounter:
+            
+            
+            print(str(tempnames[ii]), file=outfile)
+            print('\n', file=outfile)
+            for key, value in count.items():
+                print(str(key), str('{:.2%}'.format(value/counter)), file=outfile)
+            print('\n', file=outfile)
+            ii=ii+1
     
-
-    data = outputmeta
-    names=data[0].keys()
-    counter=len(data)
-    totalcounter=[]
-
-        
-    for key in data[0].keys():
-        counts=[]
-        for i in range(counter):
-            counts.append(data[i][f'{key}'])
-        
-        totalcounter.append(Counter(counts[:]))
-    tempnames=[]
-    for tempname in names:
-        tempnames.append(tempname)
-    ii=0
-    #print(totalcounter)
-    for count in totalcounter:
-        
-        
-        print(tempnames[ii])
-        print('\n')
-        for key, value in count.items():
-            print(key, '{:.2%}'.format(value/counter))
-        print('\n')
-        ii=ii+1
-    stop()
     press=input('Hit enter to exit')
-
-
-
-
-
-
-
-
 
 
 except:
@@ -707,5 +924,3 @@ except:
     time.sleep(5)
     print("program closing in 25 seconds...")
     time.sleep(25)
-    stop()
-
