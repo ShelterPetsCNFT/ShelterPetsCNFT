@@ -1,4 +1,7 @@
-
+  DONATIONS AFTER 1/24/2022 ARE NOW TRACKED VIA THE PDF NAMED invoicestake1uxhq4l63q6lw56jnw4wwyd7v2z7fh20hj3fuxcl08mzxs8ssw470g (TX hash is in pdf metadata)
+    <br />
+      <br />
+        <br />
 + 64 ADA to Pariah Dog Koh Samui - in partnership with ADADOGPOOL 12/30/2021 
   <br />
 + 160 ADA to Pariah Dog Koh Samui - https://t.co/MKJJwI6kQf 01/03/2021
@@ -34,7 +37,7 @@
 + 100 ADA to HAZELpool - https://cardanoscan.io/transaction/69e67ca327f8b1e62076f914024a5fda2beecb8156054281747d9c01663a7346 01/24/2021 
   <br />
   
-  DONATIONS AFTER THIS ARE NOW TRACKED VIA THE PDF NAMED invoicestake1uxhq4l63q6lw56jnw4wwyd7v2z7fh20hj3fuxcl08mzxs8ssw470g
+
   
   
   
