@@ -1,4 +1,4 @@
-#updated 02/04/2022 10:17 CST
+#updated 05/2022 
 
 import time
 import sys
@@ -172,7 +172,7 @@ def create_project(namelistr, newproj):
     
 def create_meta(item, listoflist, metadatastring, metalistheader, nftname,headername,metvalue, assetname):
 
-    metadatastring={"721": {"<policy_id>": {"<asset_name>":{}, "version": "1.0"}}}
+    metadatastring={"721": {"<policy_id>": {"<asset_name>":{}}, "version": "1.0"}}
         
         
     filler={"name": nftname, "image": "<ipfs_link>", "mediaType": "<mime_type>",
@@ -180,7 +180,7 @@ def create_meta(item, listoflist, metadatastring, metalistheader, nftname,header
          "files": [{"name": nftname, "mediaType": "<mime_type>", "src": "<ipfs_link>"}]}    
     
     
-    metadatastring['721']['<policy_id>']={"<asset_name>": {}, "version": "1.0"}
+    metadatastring['721']['<policy_id>']={"<asset_name>": {}}
     
 
     
@@ -737,7 +737,8 @@ try:
             loadmetadata=''
         else:
         
-            loadmetadata=input('Do you want to load and check a NFTMAKER projects metadata? Y/N?  ')
+            # loadmetadata=input('Do you want to load and check a NFTMAKER projects metadata? Y/N?  ')
+            loadmetadata=''
             previousimage=0
             
 
@@ -751,7 +752,7 @@ try:
     traitnames=[]
     sub_folders2=[]
     sub_folders = [name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))]
-
+    
     sub_folders =namelistr
     for i in range(0,len(sub_folders),1):
         
