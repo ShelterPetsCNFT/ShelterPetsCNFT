@@ -1,8 +1,7 @@
 <br><br>
 
-Please consider purchasing an NFT if you utilize this code. 
 <br><br>
-
+just install python and run
 
 Cardano NFT Generator
 
